@@ -19,7 +19,7 @@ def get_files_labels(pattern: str):
     files = glob.glob(pattern)
     names = []
     for f in files:
-        t = f.rsplit('\\', maxsplit=1)[1]  #'./data/jazz_classic_pop/jazz_piano_train_273.npy'
+        t = f.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/jazz_piano_train_273.npy'
         name = t.rsplit('.', maxsplit=1)[0]
         names.append(name)
 
@@ -55,7 +55,7 @@ def train(processed_dir: str, test_wav_dir: str):
     exclude_dict = {}  #key that not appear in the value list.(eg. pop:[classic**.npy,classic**.npy,jazz**.npy ... ])
     for s in all_styles:
         p = os.path.join(processed_dir, '*.npy')  #'./data/jazz_classic_pop/*.npy'
-        temp = [fn for fn in glob.glob(p) if fn.rsplit('\\', maxsplit=1)[1].find(s) == -1]
+        temp = [fn for fn in glob.glob(p) if fn.rsplit('/', maxsplit=1)[1].find(s) == -1]
         exclude_dict[s] = temp
 
     print('Loading Data Done.')
@@ -114,7 +114,7 @@ def train(processed_dir: str, test_wav_dir: str):
             for one_filename, one_name, one_target in zip(files_shuffled[start:end], names_shuffled[start:end], pre_targets):
 
                 #target name
-                t = one_target.rsplit('\\', maxsplit=1)[1]  #'./data/jazz_classic_pop/pop_piano_train_688.npy'
+                t = one_target.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/pop_piano_train_688.npy'
                 target_style_name = t.rsplit('.', maxsplit=1)[0].split('_')[0]
 
                 #source name
