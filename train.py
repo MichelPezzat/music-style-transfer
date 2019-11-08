@@ -186,8 +186,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 #one midi slice as input
                 sample_npy = np.load(one_file) * 1.
                 sample_npy_re = sample_npy.reshape(1, sample_npy.shape[0], sample_npy.shape[1], 1)
-                midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
-                midi_path_transfer = os.path.join(file_path, '{}_transfer.mid'.format(name))
+                
 
                 
 
@@ -204,7 +203,8 @@ def train(processed_dir: str, test_wav_dir: str):
 
                 generated_results,origin_midi = model.test(sample_npy_re, one_test_sample_label)
 
-                
+                midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
+                midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
 
                 save_midis(origin_midi, midi_path_origin)
                 save_midis(generated_results_binary, midi_path_transfer)
