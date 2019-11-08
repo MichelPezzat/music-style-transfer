@@ -179,15 +179,15 @@ def train(processed_dir: str, test_wav_dir: str):
                 tempfiles.append(npys[0])
                 tempfiles.append(npys[1])  #'./data/test/pop/pop_piano_test.npy'
 
-            for idx in range(len(tempfiles)):
+            for one_file in tempfiles:
                 _, style, name = one_file.rsplit('/', maxsplit=2)
                
 
                 #one midi slice as input
-                sample_npy = np.load(tempfiles[idx]) * 1.
+                sample_npy = np.load(one_file) * 1.
                 sample_npy_re = sample_npy.reshape(1, sample_npy.shape[0], sample_npy.shape[1], 1)
-                midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(idx + 1))
-                midi_path_transfer = os.path.join(file_path, '{}_transfer.mid'.format(idx + 1))
+                midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
+                midi_path_transfer = os.path.join(file_path, '{}_transfer.mid'.format(name))
 
                 
 

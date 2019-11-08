@@ -7,7 +7,7 @@ import write_midi
 from ops import *
 
 processed_dir = './data/jazz_classic_pop'
-#test_wav_dir = './data/test'
+test_wav_dir = './data/test'
 #epoch=1
 
 
@@ -60,23 +60,40 @@ def save_midis(bars, file_path, tempo=80.0):
     write_midi.write_piano_rolls_to_midi(images_with_pause_list, program_nums=[0], is_drum=[False], filename=file_path,
 
                                          tempo=tempo, beat_resolution=4)
-#all_styles = get_styles()
+all_styles = get_styles()
+label_enc = LabelEncoder()
+label_enc.fit(all_styles)
 #file_path = os.path.join('./out', f'{epoch}')
 #if not os.path.exists(file_path):
 #    os.makedirs(file_path)
 
-#tempfiles = []
-#for one_style in all_styles:
-#    p = os.path.join(test_wav_dir, f'{one_style}/*.npy')
-#    npys = glob.glob(p)
-#    tempfiles.append(npys[0])
-#   tempfiles.append(npys[1])
+tempfiles = []
+for one_style in all_styles:
+    p = os.path.join(test_wav_dir, f'{one_style}/*.npy')
+    npys = glob.glob(p)
+    tempfiles.append(npys[0])
+    tempfiles.append(npys[1])
 
-#for idx in range(len(tempfiles)):
-#    sample_npy = np.load(tempfiles[idx]) * 1.
-#    sample_npy_re = sample_npy.reshape(1, sample_npy.shape[0], sample_npy.shape[1], 1)
-#    midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(idx + 1))
-#    origin_midi = to_binary(sample_npy_re,0.5)
+for one_file in tempfiles:
+
+    _, style, name = one_file.rsplit('\\', maxsplit=2) 
+
+    name = name.rsplit('.', maxsplit=1)[0]
+
+    one_test_sample_label = np.zeros([len(all_styles)])
+    temp_index = label_enc.transform([style])[0]
+    temp_index = (temp_index + 2) % len(all_styles)
+
+                
+    one_test_sample_label[temp_index] = 1
+    target_name = label_enc.inverse_transform([temp_index])[0]
+
+    print(style,target_name,one_test_sample_label,name)
+
+    sample_npy = np.load(one_file) * 1.
+    sample_npy_re = sample_npy.reshape(1, sample_npy.shape[0], sample_npy.shape[1], 1)
+    #midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(idx + 1))
+    #origin_midi = to_binary(sample_npy_re,0.5)
     #print(origin_midi.shape())
 #    save_midis(origin_midi, midi_path_origin)
 
