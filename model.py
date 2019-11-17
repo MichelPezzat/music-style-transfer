@@ -75,9 +75,22 @@ class StarGANVC(object):
 
         self.discirmination_fake = self.discriminator(self.generated_forward, self.target_label, reuse=True, name='discriminator')
 
-        self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.zeros_like(self.discirmination))
-        self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination))
-        self.discrimator_loss = (self.discrimination_fake_loss + self.discrimination_real_loss)/2
+        self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.zeros_like(self.discrimination_real))
+        self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination_fake))
+        
+
+        epsilon = tf.random_uniform((self.batchsize, 1, 1, 1), 0.0, 1.0)
+        x_hat = epsilon * self.generated_forward + (1.0 - epsilon) * self.input_real
+
+        # gradient penalty
+        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, scope_name='discriminator'), [x_hat])
+        _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
+
+
+
+
+
+        self.discrimator_loss = (self.discrimination_fake_loss + self.discrimination_real_loss)/2 + _gradient_penalty
 
         #domain classify loss
 
