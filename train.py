@@ -176,19 +176,14 @@ def train(processed_dir: str, test_wav_dir: str):
             for one_style in all_styles:
                 p = os.path.join(test_wav_dir, f'{one_style}/*.npy')
                 npys = glob.glob(p)
-                tempfiles.append(npys[0])
-                tempfiles.append(npys[1])  #'./data/test/pop/pop_piano_test.npy'
+                npys.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[-1]))
+                tempfiles.append(list(zip(npys[:BATCHSIZE])))   #'./data/test/pop/pop_piano_test.npy'
 
-            for one_file in tempfiles:
-                _, style, name = one_file.rsplit('/', maxsplit=2)
-               
+            for one_style_batch in tempfiles:
+                _, style, name = one_style_batch[0][0].rsplit('\\', maxsplit=2)
 
-                #one midi slice as input
-                sample_npy = np.load(one_file) * 1.
-                sample_npy_re = sample_npy.reshape(1, sample_npy.shape[0], sample_npy.shape[1], 1)
-                
-
-                
+                sample_images = [np.load(one_style_batch[0])*1 for one_style_batch in one_style_batch]
+                sample_images = np.array(sample_images).astype(np.float32)
 
                 #target label 1->2, 2->3, 3->0, 0->1
                 one_test_sample_label = np.zeros([len(all_styles)])
@@ -201,7 +196,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 #get conversion target name ,like SF1
                 target_name = label_enc.inverse_transform([temp_index])[0]
 
-                generated_results,origin_midi = model.test(sample_npy_re, one_test_sample_label)
+                generated_results,origin_midi = model.test(sample_images, one_test_sample_label)
 
                 midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
                 midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
@@ -257,3 +252,4 @@ if __name__ == '__main__':
 
     print('Training Time: %02d:%02d:%02d' % \
     (time_elapsed // 3600, (time_elapsed % 3600 // 60), (time_elapsed % 60 // 1)))
+
