@@ -62,7 +62,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
     #====================create model=============#
     BATCHSIZE = 16
-    model = StarGANVC(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM)
+    model = StarGANVC(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
     #====================start train==============#
     EPOCH = 101
 

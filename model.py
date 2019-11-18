@@ -13,6 +13,7 @@ class StarGANVC(object):
                  time_step,
                  pitch_range,
                  styles_num,
+                 batchsize,
                  discriminator=discriminator,
                  generator=generator_resnet,
                  classifier=domain_classifier,
@@ -112,7 +113,7 @@ class StarGANVC(object):
         self.lambda_classifier = tf.placeholder(tf.float32, None, name='lambda_classifier')
 
         self.generator_loss_all = self.generator_loss + self.lambda_cycle * self.cycle_loss + \
-                                 self.lambda_classifier * self.domain_fake_loss
+                                 self.lambda_classifier * self.domain_real_loss
 
         # Categorize variables because we have to optimize the three sets of the variables separately
         trainable_variables = tf.trainable_variables()
