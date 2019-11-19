@@ -180,7 +180,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 tempfiles.append(list(zip(npys[:BATCHSIZE])))   #'./data/test/pop/pop_piano_test.npy'
 
             for one_style_batch in tempfiles:
-                _, style, name = one_style_batch[0][0].rsplit('\\', maxsplit=2)
+                _, style, name = one_style_batch[0][0].rsplit('/', maxsplit=2)
 
                 sample_images = [np.load(one_style_batch[0])*1 for one_style_batch in one_style_batch]
                 sample_images = np.array(sample_images).astype(np.float32)
