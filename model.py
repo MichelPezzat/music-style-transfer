@@ -92,7 +92,7 @@ class StarGANVC(object):
 
 
 
-        self.discrimator_loss = (self.discrimination_fake_loss + self.discrimination_real_loss)/2 + _gradient_penalty
+        self.discrimator_loss = (self.discrimination_fake_loss + self.discrimination_real_loss + _gradient_penalty)/3
 
         #domain classify loss
 
