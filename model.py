@@ -20,6 +20,7 @@ class StarGANVC(object):
                  mode='train',
                  log_dir='.\\log'):
         self.time_step = time_step
+        self.batchsize = batchsize
 
         self.input_shape = [None, time_step, pitch_range, 1]
         self.label_shape = [None, styles_num]
