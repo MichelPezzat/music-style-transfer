@@ -85,7 +85,7 @@ class StarGANVC(object):
         x_hat = epsilon * self.generated_forward + (1.0 - epsilon) * self.input_real
 
         # gradient penalty
-        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, scope_name='discriminator'), [x_hat])
+        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, name='discriminator'), [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
 
 
