@@ -203,7 +203,7 @@ class StarGANVC(object):
         return generator_summaries, discriminator_summaries, domain_classifer_summaries
 
     def test(self, inputs, label):
-        generation,inputs_test = self.sess.run([self.generation_test_binary,self.input_test_binary], feed_dict={self.input_test: inputs, self.target_label_test: label})
+        generation,input_test = self.sess.run([self.generation_test_binary,self.input_test_binary], feed_dict={self.input_test: inputs, self.target_label_test: label})
 
         return generation,input_test
 
