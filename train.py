@@ -204,7 +204,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
 
                 save_midis(origin_midi, midi_path_origin)
-                save_midis(generated_results_binary, midi_path_transfer)
+                save_midis(generated_results, midi_path_transfer)
                 
                 
                 print('============save converted midis============')
