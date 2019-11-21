@@ -186,14 +186,16 @@ def train(processed_dir: str, test_wav_dir: str):
                 sample_images = np.array(sample_images).astype(np.float32)
 
                 #target label 1->2, 2->3, 3->0, 0->1
-                one_test_sample_label = np.zeros([len(all_styles)])
-                temp_index = label_enc.transform([style_name])[0]
+                one_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
+                temp_index = label_enc.transform([style])[0]
                 temp_index = (temp_index + 2) % len(all_styles)
 
                 
-                one_test_sample_label[temp_index] = 1
+                for i in range(len(one_style_batch)):
+                    one_test_sample_label[i][temp_index] = 1
+                
 
-                #get conversion target name ,like SF1
+                #get conversion target name ,like pop_piano_test_1
                 target_name = label_enc.inverse_transform([temp_index])[0]
 
                 generated_results,origin_midi = model.test(sample_images, one_test_sample_label)
