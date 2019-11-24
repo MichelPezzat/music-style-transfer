@@ -7,7 +7,7 @@ import numpy as np
 #from preprocess import *
 
 
-class StarGANVC(object):
+class StarGAN(object):
 
     def __init__(self,
                  time_step,

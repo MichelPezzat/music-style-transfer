@@ -14,6 +14,7 @@ from utility import *
 TIME_STEP = 64
 PITCH_RANGE = 84
 STYLES_NUM = 3
+MODEL_NAME = 'stargan_model'
 
 def get_files_labels(pattern: str):
     files = glob.glob(pattern)
@@ -62,7 +63,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
     #====================create model=============#
     BATCHSIZE = 16
-    model = StarGANVC(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
+    model = StarGAN(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
     #====================start train==============#
     EPOCH = 101
 
