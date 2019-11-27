@@ -201,6 +201,8 @@ def train(processed_dir: str, test_wav_dir: str):
 
                 generated_results,origin_midi = model.test(sample_images, one_test_sample_label)
 
+                print(generated_results.shape)
+
                 midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
                 midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
 
