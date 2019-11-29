@@ -62,7 +62,7 @@ def train(processed_dir: str, test_wav_dir: str):
     print('Loading Data Done.')
 
     #====================create model=============#
-    BATCHSIZE = 16
+    BATCHSIZE = 8
     model = StarGAN(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
     #====================start train==============#
     EPOCH = 101
@@ -149,6 +149,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 ])
                 temp_arr_t[temp_index_t] = 1
                 y_t.append(temp_arr_t)
+            
 
 
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\

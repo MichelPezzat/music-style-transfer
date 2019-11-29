@@ -64,8 +64,8 @@ class StarGAN(object):
 
 
         #Identity loss
-        #self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, scope_name='generator')
-        #self.identity_loss = l1_loss(self.input_real, self.identity_map)
+        self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, name='generator')
+        self.identity_loss = abs_criterion(self.input_real, self.identity_map)
 
         self.discrimination_real = self.discriminator(self.target_real, self.target_label, reuse=False, name='discriminator')
 
@@ -114,8 +114,9 @@ class StarGAN(object):
         self.lambda_classifier = tf.placeholder(tf.float32, None, name='lambda_classifier')
 
         self.generator_loss_all = self.generator_loss + self.lambda_cycle * self.cycle_loss + \
+                                self.lambda_identity * self.identity_loss +\
                                  self.lambda_classifier * self.domain_real_loss
-        self.discrimator_loss = (self.discrimination_fake_loss + self.discrimination_real_loss)/2 + _gradient_penalty + self.domain_fake_loss
+        self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + _gradient_penalty + self.domain_fake_loss
 
         # Categorize variables because we have to optimize the three sets of the variables separately
         trainable_variables = tf.trainable_variables()
@@ -220,4 +221,4 @@ class StarGAN(object):
 
 
 if __name__ == '__main__':
-    starganvc = StarGANVC(36)
+    starganvc = StarGAN(36)
