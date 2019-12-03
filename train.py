@@ -80,21 +80,21 @@ def train(processed_dir: str, test_wav_dir: str):
                 
                 domain_classifier_learning_rate = max(0, domain_classifier_learning_rate - domain_classifier_learning_rate_decay)
                 generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-                discriminator_learning_rate = max(0, discriminator_learning_rate - discriminator_learning_rate_decay)
+                #discriminator_learning_rate = max(0, discriminator_learning_rate - discriminator_learning_rate_decay)
 
-            if discriminator_learning_rate == 0 or generator_learning_rate == 0:
-                print('Early stop training.')
-                break
+            #if discriminator_learning_rate == 0 or generator_learning_rate == 0:
+             #   print('Early stop training.')
+              #  break
             # if num_iterations > 2500:
             #     lambda_identity = 1
             #     domain_classifier_learning_rate = 0
             #     generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-            #     discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
+                 discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
 
-            # if generator_learning_rate <= 0.0001:
-            #     generator_learning_rate = 0.0001
-            # if discriminator_learning_rate >= 0.0002:
-            #     discriminator_learning_rate = 0.0002
+            if generator_learning_rate <= 0.0001:
+                 generator_learning_rate = 0.0001
+             #if discriminator_learning_rate >= 0.0002:
+              #   discriminator_learning_rate = 0.0002
 
             start = i * BATCHSIZE
             end = (i + 1) * BATCHSIZE
@@ -135,7 +135,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 y.append(temp_arr_s)
 
                 #load target files and labels
-                one_file_t = np.load(one_target).astype(np.float32)
+                one_file_t = np.load(one_target)
                 
 
                 #[1,84,64,1]
