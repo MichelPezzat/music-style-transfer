@@ -28,9 +28,11 @@ def get_files_labels(pattern: str):
 
 
 def train(processed_dir: str, test_wav_dir: str):
-    timestr = time.strftime("%Y-%m-%d-%H-%M", time.localtime())  #like '2018-10-10-14-47'
+    timestr = time.strftime("%Y-%m-%d-%H-%M", time.localtime()) 
 
-    all_styles = get_styles(processed_dir)
+    restore_dir = './5_2019-12-10-06-04/model/' #like '2018-10-10-14-47'
+
+    all_styles = get_styles(processed_dir,all_styles = [])
     label_enc = LabelEncoder()
     label_enc.fit(all_styles)
 
@@ -64,11 +66,12 @@ def train(processed_dir: str, test_wav_dir: str):
     #====================create model=============#
     BATCHSIZE = 8
     model = StarGAN(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
+    model.load(restore_dir)
     #====================start train==============#
     EPOCH = 101
 
     num_samples = len(files)
-    for epoch in range(EPOCH):
+    for epoch in range(5,EPOCH):
         start_time_epoch = time.time()
 
         files_shuffled, names_shuffled = shuffle(files, names)
