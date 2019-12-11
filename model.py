@@ -18,7 +18,7 @@ class StarGAN(object):
                  generator=generator_resnet,
                  classifier=domain_classifier,
                  mode='train',
-                 log_dir='.\\log'):
+                 log_dir='./log'):
         self.time_step = time_step
         self.batchsize = batchsize
 
@@ -47,6 +47,7 @@ class StarGAN(object):
             print(self.log_dir)
             self.writer = tf.summary.FileWriter(self.log_dir, tf.get_default_graph())
             self.generator_summaries, self.discriminator_summaries, self.domain_classifier_summaries = self.summary()
+            
 
     def build_model(self):
         # Placeholders for real training samples
@@ -217,7 +218,8 @@ class StarGAN(object):
         return os.path.join(directory, filename)
 
     def load(self, filepath):
-        self.saver.restore(self.sess, filepath)
+        #self.saver.restore(self.sess, filepath)
+        self.saver.restore(self.sess, tf.train.latest_checkpoint(filepath))
 
 
 if __name__ == '__main__':
