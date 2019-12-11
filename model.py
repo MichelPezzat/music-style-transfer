@@ -22,7 +22,7 @@ class StarGAN(object):
         self.time_step = time_step
         self.batchsize = batchsize
 
-        self.input_shape = [None, time_step, pitch_range, 1]
+        self.input_shape = [None, time_step, pitch_range, 3]
         self.label_shape = [None, styles_num]
         self.styles_num = styles_num
 
