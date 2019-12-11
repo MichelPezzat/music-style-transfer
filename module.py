@@ -487,7 +487,7 @@ def generator_resnet(image, c, gf_dim = 64, reuse=False, name="generator"):
 
         # After padding, (# of images * 262 * 262 * 64)
 
-        pred = tf.nn.sigmoid(conv2d(d3, 1, 7, 1, padding='VALID', name='g_pred_c'))
+        pred = tf.nn.sigmoid(conv2d(d3, 3, 7, 1, padding='VALID', name='g_pred_c'))
 
         # Output image is (# of images * 256 * 256 * 3)
 

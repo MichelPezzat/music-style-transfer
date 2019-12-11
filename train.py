@@ -92,7 +92,7 @@ def train(processed_dir: str, test_wav_dir: str):
             #     lambda_identity = 1
             #     domain_classifier_learning_rate = 0
             #     generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-                 discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
+                discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
 
             if generator_learning_rate <= 0.0001:
                  generator_learning_rate = 0.0001
