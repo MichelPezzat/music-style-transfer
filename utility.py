@@ -6,7 +6,7 @@ import numpy as np
 import write_midi
 from ops import *
 
-processed_dir = './data/jazz_classic_pop'
+processed_dir = './data/rock_bossanova_funk_RnB'
 
 
 
