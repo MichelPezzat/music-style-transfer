@@ -599,9 +599,9 @@ def domain_classifier(image, reuse=False, name="classifier"):
         # h2 is (8 x 7 x self.df_dim*4)
         h3 = lrelu(instance_norm(conv2d(h2, 512, [8, 1], [8, 1], name='d_h3_conv'), 'd_bn3'))
         # h3 is (1 x 7 x self.df_dim*8)
-        h4 = conv2d(h3, 3, [1, 7], [1, 7], name='d_h3_pred')
-        # h4 is (1 x 1 x 3)
-        return tf.reshape(h4, [-1, 3])  # batch_size * 3
+        h4 = conv2d(h3, 4, [1, 7], [1, 7], name='d_h3_pred')
+        # h4 is (1 x 1 x 4)
+        return tf.reshape(h4, [-1, 4])  # batch_size * 4
 
 
 def PhraseGenerator(in_tensor, output_dim, reuse=False, name='generator'):
