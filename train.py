@@ -13,7 +13,7 @@ from utility import *
 
 TIME_STEP = 64
 PITCH_RANGE = 84
-STYLES_NUM = 4
+STYLES_NUM = 3
 MODEL_NAME = 'stargan_model'
 
 def get_files_labels(pattern: str):
@@ -30,9 +30,9 @@ def get_files_labels(pattern: str):
 def train(processed_dir: str, test_wav_dir: str):
     timestr = time.strftime("%Y-%m-%d-%H-%M", time.localtime()) 
 
-    #restore_dir = './5_2019-12-10-06-04/model/' #like '2018-10-10-14-47'
+    restore_dir = './5_2019-12-10-06-04/model/' #like '2018-10-10-14-47'
 
-    all_styles = get_styles(processed_dir,all_styles = [])
+    all_styles = get_styles(processed_dir)
     label_enc = LabelEncoder()
     label_enc.fit(all_styles)
 
@@ -66,12 +66,12 @@ def train(processed_dir: str, test_wav_dir: str):
     #====================create model=============#
     BATCHSIZE = 8
     model = StarGAN(time_step=TIME_STEP, pitch_range=PITCH_RANGE,styles_num =STYLES_NUM,batchsize = BATCHSIZE)
-    #model.load(restore_dir)
+    model.load(filepath)
     #====================start train==============#
     EPOCH = 101
 
     num_samples = len(files)
-    for epoch in range(EPOCH):
+    for epoch in range(5,EPOCH):
         start_time_epoch = time.time()
 
         files_shuffled, names_shuffled = shuffle(files, names)
@@ -92,7 +92,7 @@ def train(processed_dir: str, test_wav_dir: str):
             #     lambda_identity = 1
             #     domain_classifier_learning_rate = 0
             #     generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-                discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
+                 discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
 
             if generator_learning_rate <= 0.0001:
                  generator_learning_rate = 0.0001
@@ -238,7 +238,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
 
 if __name__ == '__main__':
-    processed_dir = './data/jazz_classic_pop'
+    processed_dir = './data/rock_bossanova_funk_RnB'
     test_wav_dir = './data/test'
 
 
@@ -261,4 +261,6 @@ if __name__ == '__main__':
 
     print('Training Time: %02d:%02d:%02d' % \
     (time_elapsed // 3600, (time_elapsed % 3600 // 60), (time_elapsed % 60 // 1)))
+
+
 
