@@ -98,24 +98,46 @@ def write_piano_roll_to_midi(piano_roll, filename, program_num=0, is_drum=False,
     midi.write(filename)
 
 
-def write_piano_rolls_to_midi(piano_rolls, program_nums=None, is_drum=None, filename='test.mid', velocity=100,
-                              tempo=120.0, beat_resolution=24):
-    if len(piano_rolls) != len(program_nums) or len(piano_rolls) != len(is_drum):
-        print("Error: piano_rolls and program_nums have different sizes...")
-        return False
-    if not program_nums:
-        program_nums = [0, 0, 0]
-    if not is_drum:
-        is_drum = [False, False, False]
-    # Create a PrettyMIDI object
-    midi = pretty_midi.PrettyMIDI(initial_tempo=tempo)
-    # Iterate through all the input instruments
-    for idx in range(len(piano_rolls)):
-        # Create an Instrument object
-        instrument = pretty_midi.Instrument(program=program_nums[idx], is_drum=is_drum[idx])
-        # Set the piano roll to the Instrument object
-        set_piano_roll_to_instrument(piano_rolls[idx], instrument, velocity, tempo, beat_resolution)
-        # Add the instrument to the PrettyMIDI object
-        midi.instruments.append(instrument)
-    # Write out the MIDI data
-    midi.write(filename)
+def write_piano_rolls_to_midi(piano_rolls, filename='test.mid', velocity=100,tempo=120.0, beat_resolution=24):
+
+
+     program_nums = ["Electric Guitar (clean)", "Acoustic Bass", "Drums"]
+
+     is_drum = [False, False, True]
+
+
+     # Create a PrettyMIDI object
+     midi = pretty_midi.PrettyMIDI(initial_tempo=tempo)
+     # Iterate through all the input instruments
+     for idx in range(len(piano_rolls)):
+         # Create an Instrument object
+         if idx == 0:
+             instrument_program = pretty_midi.instrument_name_to_program('Electric Guitar (clean)')
+             instrument = pretty_midi.Instrument(program=instrument_program, is_drum=is_drum[idx])
+             # Set the piano roll to the Instrument object
+
+             set_piano_roll_to_instrument(piano_rolls[idx], instrument, velocity, tempo, beat_resolution)
+             # Add the instrument to the PrettyMIDI object
+             midi.instruments.append(instrument)
+
+
+         if idx == 1:
+             instrument_program = pretty_midi.instrument_name_to_program('Acoustic Bass')
+             instrument = pretty_midi.Instrument(program=instrument_program, is_drum=is_drum[idx])
+             # Set the piano roll to the Instrument object
+
+             set_piano_roll_to_instrument(piano_rolls[idx], instrument, velocity, tempo, beat_resolution)
+             # Add the instrument to the PrettyMIDI object
+             midi.instruments.append(instrument)
+
+         if idx == 2:
+
+             instrument = pretty_midi.Instrument(program=0, is_drum=is_drum[idx])
+             # Set the piano roll to the Instrument object
+
+             set_piano_roll_to_instrument(piano_rolls[idx], instrument, velocity, tempo, beat_resolution)
+
+             # Add the instrument to the PrettyMIDI object
+             midi.instruments.append(instrument)
+     # Write out the MIDI data
+     midi.write(filename)
