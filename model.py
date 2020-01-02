@@ -57,6 +57,8 @@ class StarGAN(object):
         self.source_label = tf.placeholder(tf.float32, self.label_shape, name='source_label')
         self.target_label = tf.placeholder(tf.float32, self.label_shape, name='target_label')
 
+        self.gaussian_noise = tf.placeholder(tf.float32, self.input_shape, name='gaussian_noise')
+
         self.generated_forward = self.generator(self.input_real, self.target_label, reuse=False, name='generator')
         self.generated_back = self.generator(self.generated_forward, self.source_label, reuse=True, name='generator')
 
@@ -68,15 +70,15 @@ class StarGAN(object):
         self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, name='generator')
         self.identity_loss = abs_criterion(self.input_real, self.identity_map)
 
-        self.discrimination_real = self.discriminator(self.target_real, self.target_label, reuse=False, name='discriminator')
+        self.discrimination_real = self.discriminator(self.target_real + self.gaussian_noise, self.target_label, reuse=False, name='discriminator')
 
         #combine discriminator and generator
-        self.discirmination = self.discriminator(self.generated_forward, self.target_label, reuse=True, name='discriminator')
+        self.discirmination = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
 
         self.generator_loss = self.criterionGAN(self.discirmination,tf.ones_like(self.discirmination))
         # Discriminator adversial loss
 
-        self.discirmination_fake = self.discriminator(self.generated_forward, self.target_label, reuse=True, name='discriminator')
+        self.discirmination_fake = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
 
         self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.ones_like(self.discrimination_real))
         self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination_fake))
@@ -157,7 +159,7 @@ class StarGAN(object):
         self.generation_test_binary = to_binary(self.generation_test,0.5)
 
     def train(self, input_source, input_target, source_label, target_label,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
-    generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001):
+    generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001, gaussian_noise):
 
         generation_f, _, generator_loss, _, generator_summaries = self.sess.run(
             [self.generated_forward, self.generated_back, self.generator_loss, self.generator_optimizer, self.generator_summaries], \
@@ -171,7 +173,7 @@ class StarGAN(object):
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
         [self.discrimator_loss, self.discriminator_optimizer, self.discriminator_summaries], \
             feed_dict = {self.input_real: input_source, self.target_real: input_target , self.target_label:target_label,\
-            self.discriminator_learning_rate: discriminator_learning_rate})
+            self.discriminator_learning_rate: discriminator_learning_rate,self.gaussian_noise: gaussian_noise})
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
 

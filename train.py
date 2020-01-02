@@ -13,7 +13,7 @@ from utility import *
 
 TIME_STEP = 64
 PITCH_RANGE = 84
-STYLES_NUM = 3
+STYLES_NUM = 4
 MODEL_NAME = 'stargan_model'
 
 def get_files_labels(pattern: str):
@@ -78,6 +78,9 @@ def train(processed_dir: str, test_wav_dir: str):
 
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
+
+            gaussian_noise = np.abs(np.random.normal(0, 1, [BATCHSIZE, TIME_STEP,
+                                                                         PITCH_RANGE, 3]))
 
             if num_iterations > 2500:
                 
@@ -161,7 +164,8 @@ def train(processed_dir: str, test_wav_dir: str):
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
-            lambda_classifier=lambda_classifier
+            lambda_classifier=lambda_classifier,\
+            gaussian_noise = gaussian_noise
             )
 
             print('Iteration: {:07d}, Generator Learning Rate: {:.7f}, Discriminator Learning Rate: {:.7f},Generator Loss : {:.3f}, Discriminator Loss : {:.3f}, domain_classifier_loss: {:.3f}'\
