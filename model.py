@@ -158,8 +158,8 @@ class StarGAN(object):
         self.input_test_binary = to_binary(self.input_test,0.5) 
         self.generation_test_binary = to_binary(self.generation_test,0.5)
 
-    def train(self, input_source, input_target, source_label, target_label,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
-    generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001, gaussian_noise):
+    def train(self, input_source, input_target, source_label, target_label, gaussian_noise,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
+    generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001):
 
         generation_f, _, generator_loss, _, generator_summaries = self.sess.run(
             [self.generated_forward, self.generated_back, self.generator_loss, self.generator_optimizer, self.generator_summaries], \

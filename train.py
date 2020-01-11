@@ -160,12 +160,11 @@ def train(processed_dir: str, test_wav_dir: str):
 
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
             input_source=X, input_target=X_t, source_label=y, \
-            target_label=y_t, generator_learning_rate=generator_learning_rate,\
+            target_label=y_t, gaussian_noise = gaussian_noise, generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
             lambda_classifier=lambda_classifier,\
-            gaussian_noise = gaussian_noise
             )
 
             print('Iteration: {:07d}, Generator Learning Rate: {:.7f}, Discriminator Learning Rate: {:.7f},Generator Loss : {:.3f}, Discriminator Loss : {:.3f}, domain_classifier_loss: {:.3f}'\
