@@ -23,6 +23,7 @@ class StarGAN(object):
         self.batchsize = batchsize
 
         self.input_shape = [None, time_step, pitch_range, 3]
+        self.gaussian_noise_shape = [batchsize, time_step, pitch_range, 3]
         self.label_shape = [None, styles_num]
         self.styles_num = styles_num
 
@@ -57,7 +58,7 @@ class StarGAN(object):
         self.source_label = tf.placeholder(tf.float32, self.label_shape, name='source_label')
         self.target_label = tf.placeholder(tf.float32, self.label_shape, name='target_label')
 
-        self.gaussian_noise = tf.placeholder(tf.float32, self.input_shape, name='gaussian_noise')
+        self.gaussian_noise = tf.placeholder(tf.float32, self.gaussian_noise_shape, name='gaussian_noise')
 
         self.generated_forward = self.generator(self.input_real, self.target_label, reuse=False, name='generator')
         self.generated_back = self.generator(self.generated_forward, self.source_label, reuse=True, name='generator')
