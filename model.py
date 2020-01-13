@@ -167,7 +167,7 @@ class StarGAN(object):
             feed_dict = {self.lambda_cycle: lambda_cycle, self.lambda_identity: lambda_identity, self.lambda_classifier:lambda_classifier ,\
             self.input_real: input_source, self.target_real: input_target,\
              self.source_label:source_label, self.target_label:target_label, \
-             self.generator_learning_rate: generator_learning_rate})
+             self.generator_learning_rate: generator_learning_rate, self.gaussian_noise = gaussian_noise})
 
         self.writer.add_summary(generator_summaries, self.train_step)
 
