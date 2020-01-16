@@ -79,8 +79,8 @@ def train(processed_dir: str, test_wav_dir: str):
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
 
-            gaussian_noise = np.abs(np.random.normal(0, 1, (BATCHSIZE, TIME_STEP,
-                                                                         PITCH_RANGE, 3)))
+            #gaussian_noise = np.abs(np.random.normal(0, 1, (BATCHSIZE, TIME_STEP,
+             #                                                            PITCH_RANGE, 3)))
 
             if num_iterations > 2500:
                 
@@ -160,7 +160,7 @@ def train(processed_dir: str, test_wav_dir: str):
             print(gaussian_noise.shape)
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
             input_source=X, input_target=X_t, source_label=y, \
-            target_label=y_t, gaussian_noise = gaussian_noise, generator_learning_rate=generator_learning_rate,\
+            target_label=y_t, generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
