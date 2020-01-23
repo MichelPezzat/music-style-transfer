@@ -61,8 +61,41 @@ def save_midis(bars, file_path, tempo=80.0):
 
                                          tempo=tempo, beat_resolution=4)
 
+def get_files_labels(pattern: str):
+    files = glob.glob(pattern)
+    names = []
+    for f in files:
+        t = f.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/jazz_piano_train_273.npy'
+        name = t.rsplit('.', maxsplit=1)[0]
+        names.append(name)
 
+    return files, names
 
+all_styles = get_styles(processed_dir,all_styles=[])
+label_enc = LabelEncoder()
+label_enc.fit(all_styles)
 
+files, names = get_files_labels(os.path.join(processed_dir, '*.npy'))
 
+exclude_dict = {}  #key that not appear in the value list.(eg. pop:[classic**.npy,classic**.npy,jazz**.npy ... ])
+for s in all_styles:
+  p = os.path.join(processed_dir, '*.npy')  #'./data/jazz_classic_pop/*.npy'
+  temp = [fn for fn in glob.glob(p) if fn.rsplit('/', maxsplit=1)[1].find(s) == -1]
+  exclude_dict[s] = temp
+
+BATCHSIZE = 8
+files_shuffled, names_shuffled = shuffle(files, names)
+
+start = 0
+end =  BATCHSIZE
+
+batchnames = names_shuffled[start:end]
+pre_targets = []
+
+for name in batchnames:
+    name = name.split(sep='_')[0]  #pop
+    t = np.random.choice(exclude_dict[name], 1)[0]
+    pre_targets.append(t)
+
+print(pre_targets)
 

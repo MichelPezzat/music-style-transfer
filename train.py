@@ -75,6 +75,7 @@ def train(processed_dir: str, test_wav_dir: str):
         start_time_epoch = time.time()
 
         files_shuffled, names_shuffled = shuffle(files, names)
+        data_mixed,names_mixed = shuffle(files_shuffled,names_shuffled)
 
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
@@ -108,7 +109,7 @@ def train(processed_dir: str, test_wav_dir: str):
             if end > num_samples:
                 end = num_samples
 
-            X, X_t, y, y_t = [], [], [], []
+            X, X_t,X_m, y, y_t,y_m = [], [], [], [], [], []
 
             #get target file paths
             batchnames = names_shuffled[start:end]
@@ -118,7 +119,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 t = np.random.choice(exclude_dict[name], 1)[0]
                 pre_targets.append(t)
             #one batch train data
-            for one_filename, one_name, one_target in zip(files_shuffled[start:end], names_shuffled[start:end], pre_targets):
+            for one_filename, one_name, one_target, one_datamixed,one_namemixed in zip(files_shuffled[start:end], names_shuffled[start:end], pre_targets, data_mixed[start:end],names_mixed[start:end]):
 
                 #target name
                 t = one_target.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/pop_piano_train_688.npy'
@@ -155,12 +156,26 @@ def train(processed_dir: str, test_wav_dir: str):
                 ])
                 temp_arr_t[temp_index_t] = 1
                 y_t.append(temp_arr_t)
+
+                mixedstyle_name = one_namemixed.split('_')[0]
+
+                X_m.load(one_datamixed)
+
+
+                X_m.append(one_mixed)
+
+                temp_index_m = label_enc.transform([mixedstyle_name])[0]
+                temp_arr_m = np.zeros([
+                    len(all_styles),
+                ])
+                temp_arr_m[temp_index] = 1
+                y_m.append(temp_arr_m)
             
 
-            print(gaussian_noise.shape)
+            
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
-            input_source=X, input_target=X_t, source_label=y, \
-            target_label=y_t, generator_learning_rate=generator_learning_rate,\
+            input_source=X, input_target=X_t, input_mixed = X_m,source_label=y, \
+            target_label=y_t, mixed_label = y_m,generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\

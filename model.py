@@ -57,7 +57,10 @@ class StarGAN(object):
         self.source_label = tf.placeholder(tf.float32, self.label_shape, name='source_label')
         self.target_label = tf.placeholder(tf.float32, self.label_shape, name='target_label')
 
-        #self.gaussian_noise = tf.placeholder(tf.float32, self.input_shape, name='gaussian_noise')
+        self. input_mixed = tf.placeholder(tf.float32, self.input_shape, name='input_mixed')
+        #self. mixed_label = tf.placeholder(tf.float32, self.label_shape, name='mixed_label') 
+
+        self.gaussian_noise = tf.placeholder(tf.float32, self.input_shape, name='gaussian_noise')
 
         self.generated_forward = self.generator(self.input_real, self.target_label, reuse=False, name='generator')
         self.generated_back = self.generator(self.generated_forward, self.source_label, reuse=True, name='generator')
@@ -70,15 +73,15 @@ class StarGAN(object):
         self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, name='generator')
         self.identity_loss = abs_criterion(self.input_real, self.identity_map)
 
-        self.discrimination_real = self.discriminator(self.target_real, self.target_label, reuse=False, name='discriminator')
+        self.discrimination_real = self.discriminator(self.target_real + self.gaussian_noise, self.target_label, reuse=False, name='discriminator')
 
         #combine discriminator and generator
-        self.discirmination = self.discriminator(self.generated_forward, self.target_label, reuse=True, name='discriminator')
+        self.discirmination = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
 
         self.generator_loss = self.criterionGAN(self.discirmination,tf.ones_like(self.discirmination))
         # Discriminator adversial loss
 
-        self.discirmination_fake = self.discriminator(self.generated_forward , self.target_label, reuse=True, name='discriminator')
+        self.discirmination_fake = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
 
         self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.ones_like(self.discrimination_real))
         self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination_fake))
@@ -90,6 +93,14 @@ class StarGAN(object):
         # gradient penalty
         gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, name='discriminator'), [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
+
+
+        #self.discrimination_real_all = self.discriminator(self.input_mixed, self.mixed_label, reuse = False, name ='discriminator_all')
+        #self.discrimination_fake_all = self.discriminator(self.generated_forward,self.target_label, reuse = True, name = 'discriminator_all')
+
+        #self.d_real_loss_all = self.criterionGAN(self.discrimination_real_all,tf.ones_like(self.discrimination_real_all))
+        #self.d_fake_loss_all = self.criterionGAN(self.discrimination_fake_all,tf.zeros_like(self.discrimination_fake_all))
+        #self.d_all_loss = (d_real_loss_all + d_fake_loss_all) / 2
 
 
 
@@ -115,11 +126,13 @@ class StarGAN(object):
         self.lambda_cycle = tf.placeholder(tf.float32, None, name='lambda_cycle')
         self.lambda_identity = tf.placeholder(tf.float32, None, name='lambda_identity')
         self.lambda_classifier = tf.placeholder(tf.float32, None, name='lambda_classifier')
+        self.lambda_mixed = tf.placeholder(tf.float32, None, name='lambda_mixed')
 
         self.generator_loss_all = self.generator_loss + self.lambda_cycle * self.cycle_loss + \
                                 self.lambda_identity * self.identity_loss +\
                                  self.lambda_classifier * self.domain_real_loss
-        self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + _gradient_penalty + self.domain_fake_loss
+        self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + self.lambda_mixed * self.d_all_loss\
+                                             _gradient_penalty + self.domain_fake_loss 
 
         # Categorize variables because we have to optimize the three sets of the variables separately
         trainable_variables = tf.trainable_variables()
@@ -165,15 +178,15 @@ class StarGAN(object):
             [self.generated_forward, self.generated_back, self.generator_loss, self.generator_optimizer, self.generator_summaries], \
             feed_dict = {self.lambda_cycle: lambda_cycle, self.lambda_identity: lambda_identity, self.lambda_classifier:lambda_classifier ,\
             self.input_real: input_source, self.target_real: input_target,\
-             self.source_label:source_label, self.target_label:target_label, \
-             self.generator_learning_rate: generator_learning_rate})
+             self.source_label:source_label, self.input_mixed: input_mixed, self.mixed_label: mixed_label , self.target_label:target_label, \
+             self.generator_learning_rate: generator_learning_rate,self.gaussian_noise: gaussian_noise})
 
         self.writer.add_summary(generator_summaries, self.train_step)
 
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
         [self.discrimator_loss, self.discriminator_optimizer, self.discriminator_summaries], \
             feed_dict = {self.input_real: input_source, self.target_real: input_target , self.target_label:target_label,\
-            self.discriminator_learning_rate: discriminator_learning_rate})
+            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise})
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
 
