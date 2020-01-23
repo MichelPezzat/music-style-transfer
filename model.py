@@ -57,7 +57,7 @@ class StarGAN(object):
         self.source_label = tf.placeholder(tf.float32, self.label_shape, name='source_label')
         self.target_label = tf.placeholder(tf.float32, self.label_shape, name='target_label')
 
-        self. input_mixed = tf.placeholder(tf.float32, self.input_shape, name='input_mixed')
+        #self. input_mixed = tf.placeholder(tf.float32, self.input_shape, name='input_mixed')
         #self. mixed_label = tf.placeholder(tf.float32, self.label_shape, name='mixed_label') 
 
         self.gaussian_noise = tf.placeholder(tf.float32, self.input_shape, name='gaussian_noise')
@@ -131,7 +131,7 @@ class StarGAN(object):
         self.generator_loss_all = self.generator_loss + self.lambda_cycle * self.cycle_loss + \
                                 self.lambda_identity * self.identity_loss +\
                                  self.lambda_classifier * self.domain_real_loss
-        self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + self.lambda_mixed * self.d_all_loss\
+        self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + \
                                              _gradient_penalty + self.domain_fake_loss 
 
         # Categorize variables because we have to optimize the three sets of the variables separately
