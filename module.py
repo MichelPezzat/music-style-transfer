@@ -687,9 +687,9 @@ def PhraseDiscriminator(in_tensor, reuse=False, name='discriminator'):
 
     return h3
 
-def discriminator_c(x_init, reuse=False, name="discriminator"):
+def discriminator_c(x_init, channel = 64,reuse=False, name="discriminator"):
         with tf.variable_scope(name, reuse=reuse) :
-            channel = self.ch
+            
             x = conv(x_init, channel, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_0')
             x = lrelu(x, 0.01)
 
