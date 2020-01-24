@@ -36,6 +36,19 @@ def deconv2d(input_, output_dim, ks=7, s=2, stddev=0.02, padding='SAME', name="d
                                     weights_initializer=tf.truncated_normal_initializer(stddev=stddev),
                                     biases_initializer=None)
 
+def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, scope='conv_0'):
+    with tf.variable_scope(scope):
+        if pad_type == 'zero' :
+            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
+        if pad_type == 'reflect' :
+            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]], mode='REFLECT')
+
+        x = tf.layers.conv2d(inputs=x, filters=channels,
+                             kernel_size=kernel, kernel_initializer=weight_init,
+                             kernel_regularizer=weight_regularizer,
+                             strides=stride, use_bias=use_bias)
+
+        return x
 
 def lrelu(x, leak=0.2, name="lrelu"):
     return tf.maximum(x, leak*x)

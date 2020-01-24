@@ -686,3 +686,23 @@ def PhraseDiscriminator(in_tensor, reuse=False, name='discriminator'):
         h3 = linear(h2, 1, scope='h3')
 
     return h3
+
+def discriminator_c(x_init, reuse=False, scope="discriminator"):
+        with tf.variable_scope(scope, reuse=reuse) :
+            channel = self.ch
+            x = conv(x_init, channel, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_0')
+            x = lrelu(x, 0.01)
+
+            for i in range(1, self.n_dis):
+                x = conv(x, channel * 2, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_' + str(i))
+                x = lrelu(x, 0.01)
+
+                channel = channel * 2
+
+            c_kernel = int(self.img_size / np.power(2, self.n_dis))
+
+            logit = conv(x, channels=1, kernel=3, stride=1, pad=1, use_bias=False, scope='D_logit')
+            c = conv(x, channels=self.c_dim, kernel=c_kernel, stride=1, use_bias=False, scope='D_label')
+            c = tf.reshape(c, shape=[-1, self.c_dim])
+
+            return logit, c

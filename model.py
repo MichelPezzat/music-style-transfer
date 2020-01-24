@@ -29,10 +29,10 @@ class StarGAN(object):
         self.mode = mode
         self.log_dir = log_dir
 
-        self.discriminator = discriminator
+        self.discriminator = discriminator_c
         self.generator = generator_resnet
         self.classifier = classifier
-        self.criterionGAN = mae_criterion
+        self.criterionGAN = sce_criterion
 
         self.build_model()
 
@@ -73,15 +73,15 @@ class StarGAN(object):
         self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, name='generator')
         self.identity_loss = abs_criterion(self.input_real, self.identity_map)
 
-        self.discrimination_real = self.discriminator(self.target_real + self.gaussian_noise, self.target_label, reuse=False, name='discriminator')
+        self.discrimination_real, self.domain_out_real = self.discriminator(self.target_real + self.gaussian_noise, reuse=False, name='discriminator')
 
         #combine discriminator and generator
-        self.discirmination = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
+        self.discirmination,self.domain_out_fake = self.discriminator(self.generated_forward + self.gaussian_noise, reuse=True, name='discriminator')
 
         self.generator_loss = self.criterionGAN(self.discirmination,tf.ones_like(self.discirmination))
         # Discriminator adversial loss
 
-        self.discirmination_fake = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
+        self.discirmination_fake, self.domain_out_fake = self.discriminator(self.generated_forward + self.gaussian_noise, reuse=True, name='discriminator')
 
         self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.ones_like(self.discrimination_real))
         self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination_fake))
@@ -110,9 +110,9 @@ class StarGAN(object):
 
         #domain classify loss
 
-        self.domain_out_real = self.classifier(self.target_real, reuse=False, name='classifier')
+        #self.domain_out_real = self.classifier(self.target_real, reuse=False, name='classifier')
 
-        self.domain_out_fake = self.classifier(self.generated_forward, reuse=True, name='classifier')
+        #self.domain_out_fake = self.classifier(self.generated_forward, reuse=True, name='classifier')
 
         #domain_out_xxx [batchsize, 1,1,4], need to convert label[batchsize, 3] to [batchsize, 1,1,3]
         target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
