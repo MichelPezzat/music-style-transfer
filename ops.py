@@ -5,7 +5,7 @@ import tensorflow.contrib.slim as slim
 from tensorflow.python.framework import ops
 #from utils import *
 
-weight_init = tf_contrib.layers.xavier_initializer()
+weight_init = tf.contrib.layers.xavier_initializer()
 weight_regularizer = None
 
 def batch_norm(x, name="batch_norm"):
