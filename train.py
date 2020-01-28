@@ -80,7 +80,7 @@ def train(processed_dir: str, test_wav_dir: str):
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
 
-            gaussian_noise = np.abs(np.random.normal(0, 1, (BATCHSIZE, TIME_STEP,
+            gaussian_noise = np.abs(np.random.normal(0, 0, (BATCHSIZE, TIME_STEP,
                                                                          PITCH_RANGE, 3)))
 
             if num_iterations > 2500:

@@ -149,7 +149,7 @@ class StarGAN(object):
         #optimizer
         self.generator_learning_rate = tf.placeholder(tf.float32, None, name='generator_learning_rate')
         self.discriminator_learning_rate = tf.placeholder(tf.float32, None, name='discriminator_learning_rate')
-        self.classifier_learning_rate = tf.placeholder(tf.float32, None, name="domain_classifier_learning_rate")
+        #self.classifier_learning_rate = tf.placeholder(tf.float32, None, name="domain_classifier_learning_rate")
 
         self.discriminator_optimizer = tf.train.AdamOptimizer(
             learning_rate=self.discriminator_learning_rate, beta1=0.5).minimize(
@@ -159,8 +159,8 @@ class StarGAN(object):
             learning_rate=self.generator_learning_rate, beta1=0.5).minimize(
                 self.generator_loss_all, var_list=self.generator_vars)
 
-        self.classifier_optimizer = tf.train.AdamOptimizer(learning_rate=self.classifier_learning_rate).minimize(
-            self.domain_real_loss, var_list=self.classifier_vars)
+        #self.classifier_optimizer = tf.train.AdamOptimizer(learning_rate=self.classifier_learning_rate).minimize(
+         #   self.domain_real_loss, var_list=self.classifier_vars)
 
         # test
         self.input_test = tf.placeholder(tf.float32, self.input_shape, name='input_test')
@@ -190,10 +190,10 @@ class StarGAN(object):
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
 
-        domain_classifier_real_loss, _, domain_classifier_summaries = self.sess.run(\
-        [self.domain_real_loss, self.classifier_optimizer, self.domain_classifier_summaries],\
+        domain_classifier_real_loss, domain_classifier_summaries = self.sess.run(\
+        [self.domain_real_loss, self.domain_classifier_summaries],\
         feed_dict={self.input_real: input_source, self.target_label:target_label, self.target_real:input_target, \
-        self.classifier_learning_rate:classifier_learning_rate}
+        self.gaussian_noise: gaussian_noise}
         )
         self.writer.add_summary(domain_classifier_summaries, self.train_step)
 
