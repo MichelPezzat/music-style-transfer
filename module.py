@@ -699,10 +699,10 @@ def discriminator_c(x_init, channel = 64,reuse=False, name="discriminator"):
 
                 channel = channel * 2
 
-            c_kernel = [int(64 / np.power(2, 6)),int(84 / np.power(2, 6))]
+            
 
             logit = conv(x, channels=1, kernel=3, stride=1, pad=1, use_bias=False, scope='D_logit')
-            c = conv(x, channels=4, kernel=c_kernel, stride=1, use_bias=False, scope='D_label')
+            c = conv(x, channels=4, kernel=1, stride=1, use_bias=False, scope='D_label')
             c = tf.reshape(c, shape=[-1, 4])
 
             return logit, c
