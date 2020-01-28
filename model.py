@@ -91,7 +91,7 @@ class StarGAN(object):
         x_hat = epsilon * self.generated_forward + (1.0 - epsilon) * self.input_real
 
         # gradient penalty
-        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, name='discriminator'), [x_hat])
+        gradients = tf.gradients(self.discriminator(x_hat, reuse=True, name='discriminator'), [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
 
 
@@ -138,7 +138,7 @@ class StarGAN(object):
         trainable_variables = tf.trainable_variables()
         self.discriminator_vars = [var for var in trainable_variables if 'discriminator' in var.name]
         self.generator_vars = [var for var in trainable_variables if 'generator' in var.name]
-        self.classifier_vars = [var for var in trainable_variables if 'classifier' in var.name]
+        #self.classifier_vars = [var for var in trainable_variables if 'classifier' in var.name]
         # for var in self.discriminator_vars:
         #     print(var.name)
         # for var in self.generator_vars:
