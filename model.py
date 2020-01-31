@@ -186,7 +186,7 @@ class StarGAN(object):
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
         [self.discrimator_loss, self.discriminator_optimizer, self.discriminator_summaries], \
             feed_dict = {self.input_real: input_source, self.target_real: input_target , self.input_mixed: input_mixed, self.target_label:target_label,\
-            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise \
+            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise, \
             self.lambda_mixed: lambda_mixed})
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
