@@ -177,7 +177,7 @@ class StarGAN(object):
         generation_f, _, generator_loss, _, generator_summaries = self.sess.run(
             [self.generated_forward, self.generated_back, self.generator_loss, self.generator_optimizer, self.generator_summaries], \
             feed_dict = {self.lambda_cycle: lambda_cycle, self.lambda_identity: lambda_identity, self.lambda_classifier:lambda_classifier ,\
-            self.input_real: input_source, self.target_real: input_target, self.input_mixed: input_mixed\
+            self.input_real: input_source, self.target_real: input_target, self.input_mixed: input_mixed,\
              self.source_label:source_label, self.target_label:target_label, \
              self.generator_learning_rate: generator_learning_rate,self.gaussian_noise: gaussian_noise})
 
