@@ -39,6 +39,7 @@ def train(processed_dir: str, test_wav_dir: str):
     lambda_cycle = 10
     lambda_identity = 5
     lambda_classifier = 3
+    lambda_mixed = 1
 
     generator_learning_rate = 0.0002
     generator_learning_rate_decay = generator_learning_rate / 20000
@@ -172,7 +173,7 @@ def train(processed_dir: str, test_wav_dir: str):
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
-            lambda_classifier=lambda_classifier, gaussian_noise = gaussian_noise\
+            lambda_classifier=lambda_classifier, lambda_mixed = lambda_mixed, gaussian_noise = gaussian_noise\
             )
 
             print('Iteration: {:07d}, Generator Learning Rate: {:.7f}, Discriminator Learning Rate: {:.7f},Generator Loss : {:.3f}, Discriminator Loss : {:.3f}, domain_classifier_loss: {:.3f}'\
