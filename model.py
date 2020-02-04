@@ -37,6 +37,7 @@ class StarGAN(object):
         self.build_model()
 
         self.saver = tf.train.Saver()
+        self.pool = ImagePool(50)
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
@@ -94,9 +95,11 @@ class StarGAN(object):
         gradients = tf.gradients(self.discriminator(x_hat, reuse=True, name='discriminator'), [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
 
+        self.fake_sample = tf.placeholder(self.input_shape, name = "fake_sample")
+
 
         self.discrimination_real_all,_ = self.discriminator(self.input_mixed, reuse = False, name ='discriminator_all')
-        self.discrimination_fake_all,_ = self.discriminator(self.generated_forward, reuse = True, name = 'discriminator_all')
+        self.discrimination_fake_all,_ = self.discriminator(self.fake_sample, reuse = True, name = 'discriminator_all')
 
         self.d_real_loss_all = self.criterionGAN(self.discrimination_real_all,tf.ones_like(self.discrimination_real_all))
         self.d_fake_loss_all = self.criterionGAN(self.discrimination_fake_all,tf.zeros_like(self.discrimination_fake_all))
@@ -181,12 +184,15 @@ class StarGAN(object):
              self.source_label:source_label, self.target_label:target_label, \
              self.generator_learning_rate: generator_learning_rate,self.gaussian_noise: gaussian_noise})
 
+
+
         self.writer.add_summary(generator_summaries, self.train_step)
+        fake = self.pool(generation_f)
 
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
         [self.discrimator_loss, self.discriminator_optimizer, self.discriminator_summaries], \
-            feed_dict = {self.input_real: input_source, self.target_real: input_target , self.input_mixed: input_mixed, self.target_label:target_label,\
-            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise, \
+            feed_dict = {self.input_real: input_source, self.target_real: input_target , self.fake_sample: fake ,self.input_mixed: input_mixed, \
+            self.target_label:target_label, self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise, \
             self.lambda_mixed: lambda_mixed})
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
