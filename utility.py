@@ -5,6 +5,7 @@ from sklearn.utils import shuffle
 import numpy as np
 import write_midi
 from ops import *
+import copy
 
 processed_dir = './data/rock_bossanova_funk_RnB'
 
