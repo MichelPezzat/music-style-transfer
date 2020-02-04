@@ -2,7 +2,7 @@ import os
 import tensorflow as tf
 from module import *
 from datetime import datetime
-#from utils import *
+from utility import *
 import numpy as np
 #from preprocess import *
 
