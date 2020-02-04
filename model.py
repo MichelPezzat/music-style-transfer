@@ -95,7 +95,7 @@ class StarGAN(object):
         gradients = tf.gradients(self.discriminator(x_hat, reuse=True, name='discriminator'), [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
 
-        self.fake_sample = tf.placeholder(self.input_shape, name = "fake_sample")
+        self.fake_sample = tf.placeholder(tf.float32, self.input_shape, name = "fake_sample")
 
 
         self.discrimination_real_all,_ = self.discriminator(self.input_mixed, reuse = False, name ='discriminator_all')
