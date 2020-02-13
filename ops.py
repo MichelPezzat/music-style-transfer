@@ -37,6 +37,7 @@ def deconv2d(input_, output_dim, ks=7, s=2, stddev=0.02, padding='SAME', name="d
                                     weights_initializer=tf.truncated_normal_initializer(stddev=stddev),
                                     biases_initializer=None)
 
+
 def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, scope='conv_0'):
     with tf.variable_scope(scope):
         if pad_type == 'zero' :
@@ -50,6 +51,30 @@ def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True,
                              strides=stride, use_bias=use_bias)
 
         return x
+
+def deconv(x, channels, kernel=4, stride=2, use_bias=True, scope='deconv_0'):
+    with tf.variable_scope(scope):
+        x = tf.layers.conv2d_transpose(inputs=x, filters=channels,
+                                       kernel_size=kernel, kernel_initializer=weight_init, kernel_regularizer=weight_regularizer,
+                                       strides=stride, padding='SAME', use_bias=use_bias)
+
+        return x
+
+def resblock(x_init, channels, use_bias=True, scope='resblock'):
+    with tf.variable_scope(scope):
+        with tf.variable_scope('res1'):
+            x = conv(x_init, channels, kernel=3, stride=1, pad=1, use_bias=use_bias)
+            x = instance_norm(x)
+            x = relu(x)
+
+        with tf.variable_scope('res2'):
+            x = conv(x, channels, kernel=3, stride=1, pad=1, use_bias=use_bias)
+            x = instance_norm(x)
+
+        return x + x_init
+
+def tanh(x):
+    return tf.tanh(x)
 
 def lrelu(x, leak=0.2, name="lrelu"):
     return tf.maximum(x, leak*x)
