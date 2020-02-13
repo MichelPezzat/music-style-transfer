@@ -39,7 +39,6 @@ def train(processed_dir: str, test_wav_dir: str):
     lambda_cycle = 10
     lambda_identity = 5
     lambda_classifier = 3
-    lambda_mixed = 1
 
     generator_learning_rate = 0.0002
     generator_learning_rate_decay = generator_learning_rate / 20000
@@ -76,7 +75,7 @@ def train(processed_dir: str, test_wav_dir: str):
         start_time_epoch = time.time()
 
         files_shuffled, names_shuffled = shuffle(files, names)
-        data_mixed = shuffle(files_shuffled)
+        data_mixed,names_mixed = shuffle(files_shuffled,names_shuffled)
 
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
@@ -88,7 +87,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 
                 domain_classifier_learning_rate = max(0, domain_classifier_learning_rate - domain_classifier_learning_rate_decay)
                 generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-                #discriminator_learning_rate = max(0, discriminator_learning_rate - discriminator_learning_rate_decay)
+                discriminator_learning_rate = max(0, discriminator_learning_rate - discriminator_learning_rate_decay)
 
             #if discriminator_learning_rate == 0 or generator_learning_rate == 0:
              #   print('Early stop training.')
@@ -97,12 +96,12 @@ def train(processed_dir: str, test_wav_dir: str):
             #     lambda_identity = 1
             #     domain_classifier_learning_rate = 0
             #     generator_learning_rate = max(0, generator_learning_rate - generator_learning_rate_decay)
-                discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
+              #  discriminator_learning_rate = discriminator_learning_rate + discriminator_learning_rate_decay
 
             if generator_learning_rate <= 0.0001:
                  generator_learning_rate = 0.0001
-            if discriminator_learning_rate >= 0.0002:
-                 discriminator_learning_rate = 0.0002
+            if discriminator_learning_rate <= 0.0001:
+                 discriminator_learning_rate = 0.0001
 
             start = i * BATCHSIZE
             end = (i + 1) * BATCHSIZE
@@ -110,7 +109,7 @@ def train(processed_dir: str, test_wav_dir: str):
             if end > num_samples:
                 end = num_samples
 
-            X, X_t, X_m,y, y_t = [], [], [], [], []
+            X, X_t, y, y_t = [], [], [], []
 
             #get target file paths
             batchnames = names_shuffled[start:end]
@@ -120,9 +119,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 t = np.random.choice(exclude_dict[name], 1)[0]
                 pre_targets.append(t)
             #one batch train data
-            for one_filename, one_name, one_target, one_mixed in zip(files_shuffled[start:end], \
-                      names_shuffled[start:end], pre_targets, \
-                      data_mixed[start:end]):
+            for one_filename, one_name, one_target in zip(files_shuffled[start:end], names_shuffled[start:end], pre_targets):
 
                 #target name
                 t = one_target.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/pop_piano_train_688.npy'
@@ -160,20 +157,17 @@ def train(processed_dir: str, test_wav_dir: str):
                 temp_arr_t[temp_index_t] = 1
                 y_t.append(temp_arr_t)
 
-                one_file_mixed = np.load(one_file_mixed)
-                X_m.append(one_file_mixed)
-
                 
             
 
             
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
-            input_source=X, input_target=X_t, input_mixed = X_m,source_label=y, \
+            input_source=X, input_target=X_t, source_label=y, \
             target_label=y_t,generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
-            lambda_classifier=lambda_classifier, lambda_mixed = lambda_mixed, gaussian_noise = gaussian_noise\
+            lambda_classifier=lambda_classifier, gaussian_noise = gaussian_noise\
             )
 
             print('Iteration: {:07d}, Generator Learning Rate: {:.7f}, Discriminator Learning Rate: {:.7f},Generator Loss : {:.3f}, Discriminator Loss : {:.3f}, domain_classifier_loss: {:.3f}'\
@@ -203,27 +197,31 @@ def train(processed_dir: str, test_wav_dir: str):
                 sample_images = np.array(sample_images).astype(np.float32)
 
                 #target label 1->2, 2->3, 3->0, 0->1
-                one_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
-                temp_index = label_enc.transform([style])[0]
-                temp_index = (temp_index + 2) % len(all_styles)
+                source_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
+                target_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
+                temp_index_s = label_enc.transform([style])[0]
+                temp_index_t = (temp_index + 2) % len(all_styles)
 
                 
                 for i in range(len(one_style_batch)):
-                    one_test_sample_label[i][temp_index] = 1
+                    source_test_sample_label[i][temp_index_s] = 1
+                    target_test_sample_label[i][temp_index_t] = 1
                 
 
                 #get conversion target name ,like pop_piano_test_1
                 target_name = label_enc.inverse_transform([temp_index])[0]
 
-                generated_results,origin_midi = model.test(sample_images, one_test_sample_label)
+                generated_results,origin_midi,generated_cycle = model.test(sample_images, target_test_sample_label, source_test_sample_label)
 
-                print(generated_results.shape)
+                #print(generated_results.shape)
 
                 midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
                 midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
+                midi_path_cycle = os.path.join(file_path, '{}_transfer_2_{}_cycle.mid'.format(target_name,name))
 
                 save_midis(origin_midi, midi_path_origin)
                 save_midis(generated_results, midi_path_transfer)
+                save_midis(generated_cycle, midi_path_cycle)
                 
                 
                 print('============save converted midis============')
