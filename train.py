@@ -200,7 +200,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 source_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
                 target_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
                 temp_index_s = label_enc.transform([style])[0]
-                temp_index_t = (temp_index + 2) % len(all_styles)
+                temp_index_t = (temp_index_s + 2) % len(all_styles)
 
                 
                 for i in range(len(one_style_batch)):
