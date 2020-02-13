@@ -568,7 +568,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         u4_concat = tf.concat([u4, c4], axis=-1)
         print(f'u4_concat.shape :{u4_concat.shape.as_list()}')
 
-        u5 = tf.layers.Conv2DTranspose(filters=1, kernel_size=[3, 9], strides=[1, 1], padding='same', name='generator_last_deconv')(u4_concat)
+        u5 = tf.layers.Conv2DTranspose(filters=3, kernel_size=[3, 9], strides=[1, 1], padding='same', name='generator_last_deconv')(u4_concat)
         print(f'u5.shape :{u5.shape.as_list()}')
 
         return u5
