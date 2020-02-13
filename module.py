@@ -687,22 +687,39 @@ def PhraseDiscriminator(in_tensor, reuse=False, name='discriminator'):
 
     return h3
 
-def discriminator_c(x_init, channel = 64,reuse=False, name="discriminator"):
-        with tf.variable_scope(name, reuse=reuse) :
-            
-            x = conv(x_init, channel, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_0')
-            x = lrelu(x, 0.01)
+def generator(x_init, c, channel = 64,reuse=False, name="generator"):
+        
+        c = tf.cast(tf.reshape(c, shape=[-1, 1, 1, c.shape[-1]]), tf.float32)
+        c = tf.tile(c, [1, x_init.shape[1], x_init.shape[2], 1])
+        x = tf.concat([x_init, c], axis=-1)
 
-            for i in range(1, 6):
-                x = conv(x, channel * 2, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_' + str(i))
-                x = lrelu(x, 0.01)
+        with tf.variable_scope(scope, reuse=reuse) :
+            x = conv(x, channel, kernel=7, stride=1, pad=3, use_bias=False, scope='conv')
+            x = instance_norm(x, scope='ins_norm')
+            x = relu(x)
+
+            # Down-Sampling
+            for i in range(2) :
+                x = conv(x, channel*2, kernel=4, stride=2, pad=1, use_bias=False, scope='conv_'+str(i))
+                x = instance_norm(x, name='down_ins_norm_'+str(i))
+                x = relu(x)
 
                 channel = channel * 2
 
-            
+            # Bottleneck
+            for i in range(10):
+                x = resblock(x, channel, use_bias=False, scope='resblock_' + str(i))
 
-            logit = conv(x, channels=1, kernel=3, stride=1, pad=1, use_bias=False, scope='D_logit')
-            c = conv(x, channels=4, kernel=1, stride=1, use_bias=False, scope='D_label')
-            c = tf.reshape(c, shape=[-1, 4])
+            # Up-Sampling
+            for i in range(2) :
+                x = deconv(x, channel//2, kernel=4, stride=2, use_bias=False, scope='deconv_'+str(i))
+                x = instance_norm(x, name='up_ins_norm'+str(i))
+                x = relu(x)
 
-            return logit, c
+                channel = channel // 2
+
+
+            x = conv(x, channels=3, kernel=7, stride=1, pad=3, use_bias=False, scope='G_logit')
+            x = tanh(x)
+
+            return x
