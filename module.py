@@ -275,69 +275,7 @@ def discriminator(image, c, df_dim = 64,reuse=False, name="discriminator"):
 
         return h4
 
-def generator_unet(image, options, reuse=False, name="generator"):
 
-    dropout_rate = 0.5 if options.is_training else 1.0
-    with tf.variable_scope(name):
-        # image is 256 x 256 x input_c_dim
-        if reuse:
-            tf.get_variable_scope().reuse_variables()
-        else:
-            assert tf.get_variable_scope().reuse is False
-
-        # image is (256 x 256 x input_c_dim)
-        e1 = instance_norm(conv2d(image, options.gf_dim, name='g_e1_conv'))
-        # e1 is (128 x 128 x self.gf_dim)
-        e2 = instance_norm(conv2d(lrelu(e1), options.gf_dim*2, name='g_e2_conv'), 'g_bn_e2')
-        # e2 is (64 x 64 x self.gf_dim*2)
-        e3 = instance_norm(conv2d(lrelu(e2), options.gf_dim*4, s=3, name='g_e3_conv'), 'g_bn_e3')
-        # e3 is (32 x 32 x self.gf_dim*4)
-        e4 = instance_norm(conv2d(lrelu(e3), options.gf_dim*8, s=[2, 1], name='g_e4_conv'), 'g_bn_e4')
-        # e4 is (16 x 16 x self.gf_dim*8)
-        e5 = instance_norm(conv2d(lrelu(e4), options.gf_dim*8, s=[2, 1], name='g_e5_conv'), 'g_bn_e5')
-        # e5 is (8 x 8 x self.gf_dim*8)
-        e6 = instance_norm(conv2d(lrelu(e5), options.gf_dim*8, s=[2, 7], name='g_e6_conv'), 'g_bn_e6')
-        # e6 is (4 x 4 x self.gf_dim*8)
-        e7 = instance_norm(conv2d(lrelu(e6), options.gf_dim*8, s=[2, 1], name='g_e7_conv'), 'g_bn_e7')
-        # e7 is (2 x 2 x self.gf_dim*8)
-        e8 = instance_norm(conv2d(lrelu(e7), options.gf_dim*8, s=[2, 1], name='g_e8_conv'), 'g_bn_e8')
-        # e8 is (1 x 1 x self.gf_dim*8)
-
-        d1 = deconv2d(tf.nn.relu(e8), options.gf_dim*8, s=[2, 1], name='g_d1')
-        d1 = tf.nn.dropout(d1, dropout_rate)
-        d1 = tf.concat([instance_norm(d1, 'g_bn_d1'), e7], 3)
-        # d1 is (2 x 2 x self.gf_dim*8*2)
-
-        d2 = deconv2d(tf.nn.relu(d1), options.gf_dim*8, s=[2, 1], name='g_d2')
-        d2 = tf.nn.dropout(d2, dropout_rate)
-        d2 = tf.concat([instance_norm(d2, 'g_bn_d2'), e6], 3)
-        # d2 is (4 x 4 x self.gf_dim*8*2)
-
-        d3 = deconv2d(tf.nn.relu(d2), options.gf_dim*8, s=[2, 7], name='g_d3')
-        d3 = tf.nn.dropout(d3, dropout_rate)
-        d3 = tf.concat([instance_norm(d3, 'g_bn_d3'), e5], 3)
-        # d3 is (8 x 8 x self.gf_dim*8*2)
-
-        d4 = deconv2d(tf.nn.relu(d3), options.gf_dim*8, s=[2, 1], name='g_d4')
-        d4 = tf.concat([instance_norm(d4, 'g_bn_d4'), e4], 3)
-        # d4 is (16 x 16 x self.gf_dim*8*2)
-
-        d5 = deconv2d(tf.nn.relu(d4), options.gf_dim*4, s=[2, 1], name='g_d5')
-        d5 = tf.concat([instance_norm(d5, 'g_bn_d5'), e3], 3)
-        # d5 is (32 x 32 x self.gf_dim*4*2)
-
-        d6 = deconv2d(tf.nn.relu(d5), options.gf_dim*2, s=3, name='g_d6')
-        d6 = tf.concat([instance_norm(d6, 'g_bn_d6'), e2], 3)
-        # d6 is (64 x 64 x self.gf_dim*2*2)
-
-        d7 = deconv2d(tf.nn.relu(d6), options.gf_dim, name='g_d7')
-        d7 = tf.concat([instance_norm(d7, 'g_bn_d7'), e1], 3)
-        # d7 is (128 x 128 x self.gf_dim*1*2)
-
-        d8 = deconv2d(tf.nn.relu(d7), options.output_c_dim, name='g_d8')
-        # d8 is (256 x 256 x output_c_dim)
-
-        return tf.nn.tanh(d8)
 
 
 def generator_resnet(image, c, gf_dim = 64, reuse=False, name="generator"):
@@ -495,79 +433,7 @@ def generator_resnet(image, c, gf_dim = 64, reuse=False, name="generator"):
 
         return pred
 
-def generator_idnet(image, style_id, reuse=False, name="generator"):
 
-    with tf.variable_scope(name):
-        # image is 256 x 256 x input_c_dim
-        if reuse:
-            tf.get_variable_scope().reuse_variables()
-        else:
-            assert tf.get_variable_scope().reuse is False
-
-        
-
-        # Justin Johnson's model from https://github.com/jcjohnson/fast-neural-style/
-        # The network with 9 blocks consists of: c7s1-32, d64, d128, R128, R128, R128,
-        # R128, R128, R128, R128, R128, R128, u64, u32, c7s1-3
-
-        # Original image is (# of images * 256 * 256 * 3)
-        d0 = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
-        # c0 is (# of images * 262 * 262 * 3)
-        d1 = relu(instance_norm(conv2d(d0, 32, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
-        # c1 is (# of images * 256 * 256 * 64)
-        d2 = relu(instance_norm(conv2d(d1, 64, 3, 2, name='g_e2_c'), 'g_e2_bn'))
-        # c2 is (# of images * 128 * 128 * 128)
-        d3 = relu(instance_norm(conv2d(d2, 128, 3, 2, name='g_e3_c'), 'g_e3_bn'))
-        # c3 is (# of images * 64 * 64 * 256)
-
-        d4 = relu(instance_norm(conv2d(d3, 64, 3, 3, name='g_e4_c'), 'g_e4_bn'))
-        d5 = relu(instance_norm(conv2d(d4, 32, 3, [4, 1], name='g_e5_c'), 'g_e5_bn'))
-
-        speaker_id = tf.convert_to_tensor(style_id, dtype=tf.float32)
-        c_cast = tf.cast(tf.reshape(style_id, [-1, 1, 1, style_id.shape.dims[-1].value]), tf.float32)
-        c = tf.tile(c_cast, [1, d5.shape.dims[1].value, d5.shape.dims[2].value, 1])
-        print(c.shape.as_list())
-        concated = tf.concat([d5, c], axis=-1)
-
-        # define G network with 9 resnet blocks
-        
-
-        u4 = relu(instance_norm(deconv2d(concated, 64, 3, [4, 1], name='g_d4_dc'), 'g_d4_bn'))
-        
-        c1 = tf.tile(c_cast, [1, u4.shape.dims[1].value, u4.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u4_concat = tf.concat([u4, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-        
-        u5 = relu(instance_norm(deconv2d(u4_concat, 128, 3, 3, name='g_d5_dc'), 'g_d5_bn'))
-
-        c2 = tf.tile(c_cast, [1, u5.shape.dims[1].value, u5.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u5_concat = tf.concat([u5, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-
-        u1 = relu(instance_norm(deconv2d(u5_concat, 64, 3, 2, name='g_d1_dc'), 'g_d1_bn'))
-
-        c3 = tf.tile(c_cast, [1, u1.shape.dims[1].value, u1.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u1_concat = tf.concat([u1, c3], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-
-        # d1 is (# of images * 128 * 128 * 128)
-        u2 = relu(instance_norm(deconv2d(u1_concat, 32, 3, 2, name='g_d2_dc'), 'g_d2_bn'))
-
-        c4 = tf.tile(c_cast, [1, u2.shape.dims[1].value, u2.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u2_concat = tf.concat([u2, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-        
-        # d2 is (# of images * 256 * 256 * 64)
-        u3 = tf.pad(u2_concat, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
-        # After padding, (# of images * 262 * 262 * 64)
-        pred = tf.nn.sigmoid(deconv2d(u3, 1, 7, 1, padding='VALID', name='g_pred_c'))
-        # Output image is (# of images * 256 * 256 * 3)
-
-        return pred
 
 
 def domain_classifier(image, reuse=False, name="classifier"):
@@ -604,88 +470,10 @@ def domain_classifier(image, reuse=False, name="classifier"):
         return tf.reshape(h4, [-1, 4])  # batch_size * 4
 
 
-def PhraseGenerator(in_tensor, output_dim, reuse=False, name='generator'):
-
-    with tf.variable_scope(name, reuse=reuse):
-        h0 = tf.reshape(in_tensor, tf.stack([-1, 1, 1, in_tensor.get_shape()[1]]))
-        h0 = relu(batch_norm(deconv2d_musegan(tensor_in=h0,
-                                              out_shape=[2, 1],
-                                              out_channels=1024,
-                                              kernels=[2, 1],
-                                              strides=[2, 1],
-                                              name='h1'),
-                             'h1_bn'))
-        h1 = relu(batch_norm(deconv2d_musegan(tensor_in=h0,
-                                              out_shape=[4, 1],
-                                              out_channels=output_dim,
-                                              kernels=[3, 1],
-                                              strides=[1, 1],
-                                              name='h2'),
-                             'h2_bn'))
-        h1 = tf.transpose(tf.squeeze(h1, axis=2), [0, 2, 1])
-
-    return h1
 
 
-def BarGenerator(in_tensor, output_dim, reuse=False, name='generator'):
-
-    with tf.variable_scope(name, reuse=reuse):
-
-        h0 = tf.reshape(in_tensor, tf.stack([-1, 1, 1, in_tensor.get_shape()[1]]))
-        h0 = relu(batch_norm(deconv2d_musegan(h0, [1, 1], 1024, kernels=[1, 1], strides=[1, 1], name='h0'), 'h0_bn'))
-
-        h1 = tf.reshape(h0, [-1, 2, 1, 512])
-        h1 = relu(batch_norm(deconv2d_musegan(h1, [4, 1], 512, kernels=[2, 1], strides=[2, 1], name='h1'), 'h1_bn'))
-
-        h2 = relu(batch_norm(deconv2d_musegan(h1, [8, 1], 256, kernels=[2, 1], strides=[2, 1], name='h2'), 'h2_bn'))
-
-        h3 = relu(batch_norm(deconv2d_musegan(h2, [16, 1], 256, kernels=[2, 1], strides=[2, 1], name='h3'), 'h3_bn'))
-
-        h4 = relu(batch_norm(deconv2d_musegan(h3, [32, 1], 128, kernels=[2, 1], strides=[2, 1], name='h4'), 'h4_bn'))
-
-        h5 = relu(batch_norm(deconv2d_musegan(h4, [96, 1], 128, kernels=[3, 1], strides=[3, 1], name='h5'), 'h5_bn'))
-
-        h6 = relu(batch_norm(deconv2d_musegan(h5, [96, 7], 64, kernels=[1, 7], strides=[1, 1], name='h6'), 'h6_bn'))
-
-        h7 = deconv2d_musegan(h6, [96, 84], output_dim, kernels=[1, 12], strides=[1, 12], name='h7')
-
-    return tf.nn.tanh(h7)
 
 
-def BarDiscriminator(in_tensor, reuse=False, name='discriminator'):
-
-    with tf.variable_scope(name, reuse=reuse):
-
-        ## conv
-        h0 = lrelu(conv2d_musegan(in_tensor, 128, kernels=[1, 12], strides=[1, 12], name='h0'))
-        h1 = lrelu(conv2d_musegan(h0, 128, kernels=[1, 7], strides=[1, 7], name='h1'))
-        h2 = lrelu(conv2d_musegan(h1, 128, kernels=[2, 1], strides=[2, 1], name='h2'))
-        h3 = lrelu(conv2d_musegan(h2, 128, kernels=[2, 1], strides=[2, 1], name='h3'))
-        h4 = lrelu(conv2d_musegan(h3, 256, kernels=[4, 1], strides=[2, 1], name='h4'))
-        h5 = lrelu(conv2d_musegan(h4, 512, kernels=[3, 1], strides=[2, 1], name='h5'))
-
-        ## linear
-        h6 = tf.reshape(h5, [-1, np.product([s.value for s in h5.get_shape()[1:]])])
-        h6 = lrelu(linear(h6, 1024, scope='h6'))
-        h7 = linear(h6, 1, scope='h7')
-
-    return h5, h7
-
-
-def PhraseDiscriminator(in_tensor, reuse=False, name='discriminator'):
-
-    with tf.variable_scope(name, reuse=reuse):
-
-        ## conv
-        h0 = lrelu(conv2d_musegan(tf.expand_dims(in_tensor, axis=2), 512, kernels=[2, 1], strides=[1, 1], name='h0'))
-        h1 = lrelu(conv2d_musegan(h0, 128, kernels=[3, 1], strides=[3, 1], name='h1'))
-
-        ## linear
-        h2 = tf.reshape(h1, [-1, np.product([s.value for s in h1.get_shape()[1:]])])
-        h2 = lrelu(linear(h2, 1024, scope='h2'))
-        h3 = linear(h2, 1, scope='h3')
-
-    return h3
 
 def generator(x_init, c, channel = 64,reuse=False, name="generator"):
         
@@ -723,3 +511,153 @@ def generator(x_init, c, channel = 64,reuse=False, name="generator"):
             x = tanh(x)
 
             return x
+
+def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gatedcnn'):
+    #input shape [batchsize, h, w, c]
+    #speaker_id [batchsize, one_hot_vector]
+    #one_hot_vector：[0,1,0,0]
+    with tf.variable_scope(scope_name) as scope:
+        if reuse:
+            scope.reuse_variables()
+        else:
+            assert scope.reuse is False
+
+        #downsample
+        d1 = downsample2d_block(inputs, filters=32, kernel_size=[3, 9], strides=[1, 1], padding=[1, 4], name_prefix='down_1')
+        print(f'd1: {d1.shape.as_list()}')
+
+        d2 = downsample2d_block(d1, filters=64, kernel_size=[4, 8], strides=[2, 2], padding=[1, 3], name_prefix='down_2')
+        print(f'd2: {d2.shape.as_list()}')
+
+        d3 = downsample2d_block(d2, filters=128, kernel_size=[4, 8], strides=[2, 2], padding=[1, 3], name_prefix='down_3')
+        print(f'd3: {d3.shape.as_list()}')
+
+        d4 = downsample2d_block(d3, filters=64, kernel_size=[3, 5], strides=[1, 1], padding=[1, 2], name_prefix='down_4')
+        print(f'd4: {d4.shape.as_list()}')
+        d5 = downsample2d_block(d4, filters=5, kernel_size=[9, 5], strides=[9, 1], padding=[1, 2], name_prefix='down_5')
+
+        #upsample
+        speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
+        c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape.dims[-1].value]), tf.float32)
+        c = tf.tile(c_cast, [1, d5.shape.dims[1].value, d5.shape.dims[2].value, 1])
+        print(c.shape.as_list())
+        concated = tf.concat([d5, c], axis=-1)
+        # print(concated.shape.as_list())
+
+        u1 = upsample2d_block(concated, 64, kernel_size=[9, 5], strides=[9, 1], name_prefix='gen_up_u1')
+        print(f'u1.shape :{u1.shape.as_list()}')
+
+        c1 = tf.tile(c_cast, [1, u1.shape.dims[1].value, u1.shape.dims[2].value, 1])
+        print(f'c1 shape: {c1.shape}')
+        u1_concat = tf.concat([u1, c1], axis=-1)
+        print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
+
+        u2 = upsample2d_block(u1_concat, 128, [3, 5], [1, 1], name_prefix='gen_up_u2')
+        print(f'u2.shape :{u2.shape.as_list()}')
+        c2 = tf.tile(c_cast, [1, u2.shape[1], u2.shape[2], 1])
+        u2_concat = tf.concat([u2, c2], axis=-1)
+
+        u3 = upsample2d_block(u2_concat, 64, [4, 8], [2, 2], name_prefix='gen_up_u3')
+        print(f'u3.shape :{u3.shape.as_list()}')
+        c3 = tf.tile(c_cast, [1, u3.shape[1], u3.shape[2], 1])
+        u3_concat = tf.concat([u3, c3], axis=-1)
+
+        u4 = upsample2d_block(u3_concat, 32, [4, 8], [2, 2], name_prefix='gen_up_u4')
+        print(f'u4.shape :{u4.shape.as_list()}')
+        c4 = tf.tile(c_cast, [1, u4.shape[1], u4.shape[2], 1])
+        u4_concat = tf.concat([u4, c4], axis=-1)
+        print(f'u4_concat.shape :{u4_concat.shape.as_list()}')
+
+        u5 = tf.layers.Conv2DTranspose(filters=1, kernel_size=[3, 9], strides=[1, 1], padding='same', name='generator_last_deconv')(u4_concat)
+        print(f'u5.shape :{u5.shape.as_list()}')
+
+        return u5
+
+
+
+def discriminator_gatedcnn(inputs, speaker_id, reuse=False, name='discriminator'):
+
+    # inputs has shape [batch_size, height,width, channels]
+
+    with tf.variable_scope(scope_name) as scope:
+        # Discriminator would be reused in CycleGAN
+        if reuse:
+            scope.reuse_variables()
+        else:
+            assert scope.reuse is False
+        #convert data type to float32
+        c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape[-1]]), tf.float32)
+        c = tf.tile(c_cast, [1, inputs.shape[1], inputs.shape[2], 1])
+
+        concated = tf.concat([inputs, c], axis=-1)
+
+        # Downsample
+        d1 = downsample2d_block(
+            inputs=concated, filters=32, kernel_size=[3, 9], strides=[1, 1], padding=[1, 4], name_prefix='downsample2d_dis_block1_')
+        c1 = tf.tile(c_cast, [1, d1.shape[1], d1.shape[2], 1])
+        d1_concat = tf.concat([d1, c1], axis=-1)
+
+        d2 = downsample2d_block(
+            inputs=d1_concat, filters=32, kernel_size=[3, 8], strides=[1, 2], padding=[1, 3], name_prefix='downsample2d_dis_block2_')
+        c2 = tf.tile(c_cast, [1, d2.shape[1], d2.shape[2], 1])
+        d2_concat = tf.concat([d2, c2], axis=-1)
+
+        d3 = downsample2d_block(
+            inputs=d2_concat, filters=32, kernel_size=[3, 8], strides=[1, 2], padding=[1, 3], name_prefix='downsample2d_dis_block3_')
+        c3 = tf.tile(c_cast, [1, d3.shape[1], d3.shape[2], 1])
+        d3_concat = tf.concat([d3, c3], axis=-1)
+
+        d4 = downsample2d_block(
+            inputs=d3_concat, filters=32, kernel_size=[3, 6], strides=[1, 2], padding=[1, 2], name_prefix='downsample2d_diss_block4_')
+        c4 = tf.tile(c_cast, [1, d4.shape[1], d4.shape[2], 1])
+        d4_concat = tf.concat([d4, c4], axis=-1)
+
+        c1 = conv2d_layer(d4_concat, filters=1, kernel_size=[36, 5], strides=[36, 1], padding=[0, 1], name='discriminator-last-conv')
+
+        c1_red = tf.reduce_mean(c1, keepdims=True)
+
+        return c1_red
+
+def domain_classifier_b(inputs, reuse=False, name='classifier'):
+
+    with tf.variable_scope(scope_name) as scope:
+        if reuse:
+            scope.reuse_variables()
+        else:
+            assert scope.reuse is False
+
+        #   add slice input shape [batchsize, 8, 512, 1]
+        #get one slice
+        one_slice = inputs[:, 0:8, :, :]
+
+        d1 = tf.layers.conv2d(one_slice, 8, kernel_size=[4, 4], padding='same', name=scope_name + '_conv2d01')
+        d1_p = tf.layers.max_pooling2d(d1, [2, 2], strides=[2, 2], name=scope_name + 'p1')
+        print(f'domain_classifier_d1: {d1.shape}')
+        print(f'domain_classifier_d1_p: {d1_p.shape}')
+
+        d2 = tf.layers.conv2d(d1_p, 16, [4, 4], padding='same', name=scope_name + '_conv2d02')
+        d2_p = tf.layers.max_pooling2d(d2, [2, 2], strides=[2, 2], name=scope_name + 'p2')
+        print(f'domain_classifier_d12: {d2.shape}')
+        print(f'domain_classifier_d2_p: {d2_p.shape}')
+
+        d3 = tf.layers.conv2d(d2_p, 32, [4, 4], padding='same', name=scope_name + '_conv2d03')
+        d3_p = tf.layers.max_pooling2d(d3, [2, 2], strides=[2, 2], name=scope_name + 'p3')
+        print(f'domain_classifier_d3: {d3.shape}')
+        print(f'domain_classifier_d3_p: {d3_p.shape}')
+
+        d4 = tf.layers.conv2d(d3_p, 16, [3, 4], padding='same', name=scope_name + '_conv2d04')
+        d4_p = tf.layers.max_pooling2d(d4, [1, 2], strides=[1, 2], name=scope_name + 'p4')
+        print(f'domain_classifier_d4: {d4.shape}')
+        print(f'domain_classifier_d4_p: {d4_p.shape}')
+
+        d5 = tf.layers.conv2d(d4_p, 4, [1, 4], padding='same', name=scope_name + '_conv2d05')
+        d5_p = tf.layers.max_pooling2d(d5, [1, 2], strides=[1, 2], name=scope_name + 'p5')
+        print(f'domain_classifier_d5: {d5.shape}')
+        print(f'domain_classifier_d5_p: {d5_p.shape}')
+
+        p = tf.keras.layers.GlobalAveragePooling2D()(d5_p)
+
+        o_r = tf.reshape(p, [-1, 1, 1, p.shape.dims[1].value])
+        print(f'classifier_output: {o_r.shape}')
+
+        return o_r

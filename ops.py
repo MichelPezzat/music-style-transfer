@@ -231,3 +231,63 @@ def deconv2d_musegan(tensor_in, out_shape, out_channels, kernels, strides, stdde
                                                 padding=padding)
 
             return tf.reshape(tf.nn.bias_add(conv_transpose, biases), output_shape)
+
+def downsample2d_block(inputs, filters, kernel_size, strides, padding: list = None, name_prefix='downsample2d_block_'):
+
+    h1 = conv2d_layer(
+        inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, activation=None, name=name_prefix + 'h1_conv')
+    h1_norm = instance_norm_layer(inputs=h1, activation_fn=None, name=name_prefix + 'h1_norm')
+    h1_gates = conv2d_layer(
+        inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, activation=None, name=name_prefix + 'h1_gates')
+    h1_norm_gates = instance_norm_layer(inputs=h1_gates, activation_fn=None, name=name_prefix + 'h1_norm_gates')
+    h1_glu = gated_linear_layer(inputs=h1_norm, gates=h1_norm_gates, name=name_prefix + 'h1_glu')
+
+    return h1_glu
+
+
+def upsample2d_block(inputs, filters, kernel_size, strides, name_prefix='upsample2d_block_'):
+
+    # t1=tf.layers.Conv2DTranspose(filters,kernel_size,strides, padding='same',name=name_prefix+'conv1')(inputs)
+    # t1 = tf.layers.batch_normalization()
+
+    t1 = tf.keras.layers.Conv2DTranspose(filters, kernel_size, strides, padding='same')(inputs)
+    # t2 = tf.keras.layers.BatchNormalization()(t1)
+    t2 = tf.contrib.layers.instance_norm(t1, scope=name_prefix + 'instance1')
+
+    x1_gates = tf.keras.layers.Conv2DTranspose(filters, kernel_size, strides, padding='same')(inputs)
+
+    # x1_norm_gates = tf.keras.layers.BatchNormalization()(x1_gates)
+    x1_norm_gates = tf.contrib.layers.instance_norm(x1_gates, scope=name_prefix + 'instance2')
+    x1_glu = gated_linear_layer(t2, x1_norm_gates)
+
+    return x1_glu
+
+def gated_linear_layer(inputs, gates, name=None):
+
+    activation = tf.multiply(x=inputs, y=tf.sigmoid(gates), name=name)
+
+    return activation
+
+def instance_norm_layer(inputs, epsilon=1e-05, activation_fn=None, name=None):
+
+    instance_norm_layer = tf.contrib.layers.instance_norm(
+        inputs=inputs, center=True, scale=True, epsilon=epsilon, activation_fn=activation_fn, scope=name)
+
+    return instance_norm_layer
+
+def conv2d_layer(inputs, filters, kernel_size, strides, padding: list = None, activation=None, kernel_initializer=None, name=None):
+
+    p = tf.constant([[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
+    out = tf.pad(inputs, p, name=name + 'conv2d_pad')
+
+    conv_layer = tf.layers.conv2d(
+        inputs=out,
+        filters=filters,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding='valid',
+        activation=activation,
+        kernel_initializer=kernel_initializer,
+        name=name)
+
+    return conv_layer

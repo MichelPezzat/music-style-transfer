@@ -15,7 +15,7 @@ class StarGAN(object):
                  styles_num,
                  batchsize,
                  discriminator=discriminator,
-                 generator=generator_resnet,
+                 generator=generator,
                  classifier=domain_classifier,
                  mode='train',
                  log_dir='./log'):
@@ -168,7 +168,7 @@ class StarGAN(object):
         self.source_label_test = tf.placeholder(tf.float32,self.label_shape, name='source_label_test')
 
         self.generation_test = self.generator(self.input_test, self.target_label_test, reuse=True, name='generator')
-        self.generation_cycle = self.generator(self.generation_test,self.source_label_test, reuse=True, name= 'generator')
+        self.generation_cycle = self.generator(self.generation_test_binary,self.source_label_test, reuse=True, name= 'generator')
 
         self.input_test_binary = to_binary(self.input_test,0.5) 
         self.generation_test_binary = to_binary(self.generation_test,0.5)
@@ -224,7 +224,7 @@ class StarGAN(object):
         return generator_summaries, discriminator_summaries, domain_classifer_summaries
 
     def test(self, inputs, label, source_label):
-        generation,input_test = self.sess.run([self.generation_test_binary,self.input_test_binary, self.generation_cycle_binary],\
+        generation,input_test,generation_cycle = self.sess.run([self.generation_test_binary,self.input_test_binary, self.generation_cycle_binary],\
             feed_dict={self.input_test: inputs, self.target_label_test: label, self.source_label_test: source_label})
 
         return generation,input_test, generation_cycle
