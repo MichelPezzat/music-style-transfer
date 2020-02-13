@@ -483,7 +483,7 @@ def generator(x_init, c, channel = 64,reuse=False, name="generator"):
 
         with tf.variable_scope(name, reuse=reuse) :
             x = conv(x, channel, kernel=7, stride=1, pad=3, use_bias=False, scope='conv')
-            x = instance_norm(x, scope='ins_norm')
+            x = instance_norm(x, name='ins_norm')
             x = relu(x)
 
             # Down-Sampling
