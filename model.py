@@ -168,7 +168,7 @@ class StarGAN(object):
         self.source_label_test = tf.placeholder(tf.float32,self.label_shape, name='source_label_test')
 
         self.generation_test = self.generator(self.input_test, self.target_label_test, reuse=True, name='generator')
-        self.generation_cycle = self.generator(self.generation_cycle,self.source_label_test, reuse=True, name= 'generator')
+        self.generation_cycle = self.generator(self.generation_test,self.source_label_test, reuse=True, name= 'generator')
 
         self.input_test_binary = to_binary(self.input_test,0.5) 
         self.generation_test_binary = to_binary(self.generation_test,0.5)
