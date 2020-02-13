@@ -516,7 +516,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
     #input shape [batchsize, h, w, c]
     #speaker_id [batchsize, one_hot_vector]
     #one_hot_vector：[0,1,0,0]
-    with tf.variable_scope(scope_name) as scope:
+    with tf.variable_scope(name) as scope:
         if reuse:
             scope.reuse_variables()
         else:
@@ -579,7 +579,7 @@ def discriminator_gatedcnn(inputs, speaker_id, reuse=False, name='discriminator'
 
     # inputs has shape [batch_size, height,width, channels]
 
-    with tf.variable_scope(scope_name) as scope:
+    with tf.variable_scope(name) as scope:
         # Discriminator would be reused in CycleGAN
         if reuse:
             scope.reuse_variables()
@@ -620,7 +620,7 @@ def discriminator_gatedcnn(inputs, speaker_id, reuse=False, name='discriminator'
 
 def domain_classifier_b(inputs, reuse=False, name='classifier'):
 
-    with tf.variable_scope(scope_name) as scope:
+    with tf.variable_scope(name) as scope:
         if reuse:
             scope.reuse_variables()
         else:
