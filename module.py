@@ -481,7 +481,7 @@ def generator(x_init, c, channel = 64,reuse=False, name="generator"):
         c = tf.tile(c, [1, x_init.shape[1], x_init.shape[2], 1])
         x = tf.concat([x_init, c], axis=-1)
 
-        with tf.variable_scope(scope, reuse=reuse) :
+        with tf.variable_scope(name, reuse=reuse) :
             x = conv(x, channel, kernel=7, stride=1, pad=3, use_bias=False, scope='conv')
             x = instance_norm(x, scope='ins_norm')
             x = relu(x)
