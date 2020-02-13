@@ -217,7 +217,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
                 midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
                 midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
-                midi_path_cycle = os.path.join(file_path, '{}_transfer_2_{}_cycle.mid'.format(target_name,name))
+                midi_path_cycle = os.path.join(file_path, '{}_transfer_2_{}_cycle.mid'.format(name,target_name))
 
                 save_midis(origin_midi, midi_path_origin)
                 save_midis(generated_results, midi_path_transfer)
