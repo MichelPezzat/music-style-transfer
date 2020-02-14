@@ -534,26 +534,26 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
 
         d4 = downsample2d_block(d3, filters=64, kernel_size=[3, 5], strides=[1, 1], padding=[1, 2], name_prefix='down_4')
         print(f'd4: {d4.shape.as_list()}')
-        d5 = downsample2d_block(d4, filters=5, kernel_size=[14, 5], strides=[14, 1], padding=[1, 2], name_prefix='down_5')
-        print(f'd5.shape :{d5.shape.as_list()}')
+        #d5 = downsample2d_block(d4, filters=5, kernel_size=[14, 5], strides=[14, 1], padding=[1, 2], name_prefix='down_5')
+        #print(f'd5.shape :{d5.shape.as_list()}')
 
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
         c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape.dims[-1].value]), tf.float32)
-        c = tf.tile(c_cast, [1, d5.shape.dims[1].value, d5.shape.dims[2].value, 1])
+        c = tf.tile(c_cast, [1, d4.shape.dims[1].value, d4.shape.dims[2].value, 1])
         print(c.shape.as_list())
-        concated = tf.concat([d5, c], axis=-1)
+        concated = tf.concat([d4, c], axis=-1)
         # print(concated.shape.as_list())
 
-        u1 = upsample2d_block(concated, 64, kernel_size=[14, 5], strides=[14, 1], name_prefix='gen_up_u1')
-        print(f'u1.shape :{u1.shape.as_list()}')
+        #u1 = upsample2d_block(concated, 64, kernel_size=[14, 5], strides=[14, 1], name_prefix='gen_up_u1')
+        #print(f'u1.shape :{u1.shape.as_list()}')
 
-        c1 = tf.tile(c_cast, [1, u1.shape.dims[1].value, u1.shape.dims[2].value, 1])
-        print(f'c1 shape: {c1.shape}')
-        u1_concat = tf.concat([u1, c1], axis=-1)
-        print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
+        #c1 = tf.tile(c_cast, [1, u1.shape.dims[1].value, u1.shape.dims[2].value, 1])
+        #print(f'c1 shape: {c1.shape}')
+        #u1_concat = tf.concat([u1, c1], axis=-1)
+        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
 
-        u2 = upsample2d_block(u1_concat, 128, [3, 5], [1, 1], name_prefix='gen_up_u2')
+        u2 = upsample2d_block(concated, 128, [3, 5], [1, 1], name_prefix='gen_up_u2')
         print(f'u2.shape :{u2.shape.as_list()}')
         c2 = tf.tile(c_cast, [1, u2.shape[1], u2.shape[2], 1])
         u2_concat = tf.concat([u2, c2], axis=-1)
