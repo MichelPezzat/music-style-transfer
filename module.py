@@ -631,28 +631,28 @@ def domain_classifier_b(inputs, reuse=False, name='classifier'):
         #get one slice
         one_slice = inputs[:, 0:8, :, :]
 
-        d1 = tf.layers.conv2d(one_slice, 8, kernel_size=[4, 4], padding='same', name=scope_name + '_conv2d01')
-        d1_p = tf.layers.max_pooling2d(d1, [2, 2], strides=[2, 2], name=scope_name + 'p1')
+        d1 = tf.layers.conv2d(one_slice, 8, kernel_size=[4, 4], padding='same', name=name + '_conv2d01')
+        d1_p = tf.layers.max_pooling2d(d1, [2, 2], strides=[2, 2], name=name + 'p1')
         print(f'domain_classifier_d1: {d1.shape}')
         print(f'domain_classifier_d1_p: {d1_p.shape}')
 
-        d2 = tf.layers.conv2d(d1_p, 16, [4, 4], padding='same', name=scope_name + '_conv2d02')
-        d2_p = tf.layers.max_pooling2d(d2, [2, 2], strides=[2, 2], name=scope_name + 'p2')
+        d2 = tf.layers.conv2d(d1_p, 16, [4, 4], padding='same', name=name + '_conv2d02')
+        d2_p = tf.layers.max_pooling2d(d2, [2, 2], strides=[2, 2], name=name + 'p2')
         print(f'domain_classifier_d12: {d2.shape}')
         print(f'domain_classifier_d2_p: {d2_p.shape}')
 
-        d3 = tf.layers.conv2d(d2_p, 32, [4, 4], padding='same', name=scope_name + '_conv2d03')
-        d3_p = tf.layers.max_pooling2d(d3, [2, 2], strides=[2, 2], name=scope_name + 'p3')
+        d3 = tf.layers.conv2d(d2_p, 32, [4, 4], padding='same', name=name + '_conv2d03')
+        d3_p = tf.layers.max_pooling2d(d3, [2, 2], strides=[2, 2], name=name + 'p3')
         print(f'domain_classifier_d3: {d3.shape}')
         print(f'domain_classifier_d3_p: {d3_p.shape}')
 
-        d4 = tf.layers.conv2d(d3_p, 16, [3, 4], padding='same', name=scope_name + '_conv2d04')
-        d4_p = tf.layers.max_pooling2d(d4, [1, 2], strides=[1, 2], name=scope_name + 'p4')
+        d4 = tf.layers.conv2d(d3_p, 16, [3, 4], padding='same', name=name + '_conv2d04')
+        d4_p = tf.layers.max_pooling2d(d4, [1, 2], strides=[1, 2], name=name + 'p4')
         print(f'domain_classifier_d4: {d4.shape}')
         print(f'domain_classifier_d4_p: {d4_p.shape}')
 
-        d5 = tf.layers.conv2d(d4_p, 4, [1, 4], padding='same', name=scope_name + '_conv2d05')
-        d5_p = tf.layers.max_pooling2d(d5, [1, 2], strides=[1, 2], name=scope_name + 'p5')
+        d5 = tf.layers.conv2d(d4_p, 4, [1, 4], padding='same', name=name + '_conv2d05')
+        d5_p = tf.layers.max_pooling2d(d5, [1, 2], strides=[1, 2], name=name + 'p5')
         print(f'domain_classifier_d5: {d5.shape}')
         print(f'domain_classifier_d5_p: {d5_p.shape}')
 
