@@ -535,6 +535,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         d4 = downsample2d_block(d3, filters=64, kernel_size=[3, 5], strides=[1, 1], padding=[1, 2], name_prefix='down_4')
         print(f'd4: {d4.shape.as_list()}')
         d5 = downsample2d_block(d4, filters=5, kernel_size=[9, 5], strides=[9, 1], padding=[1, 2], name_prefix='down_5')
+        print(f'd5.shape :{d5.shape.as_list()}')
 
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
