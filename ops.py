@@ -275,7 +275,7 @@ def instance_norm_layer(inputs, epsilon=1e-05, activation_fn=None, name=None):
 
     return instance_norm_layer
 
-def conv2d_layer(inputs, filters, kernel_size, strides, padding: list = None, activation=None, kernel_initializer=None, name=None):
+def conv2d_layer(inputs, filters, kernel_size, strides, padding: [1,1], activation=None, kernel_initializer=None, name=None):
 
     p = tf.constant([[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
     out = tf.pad(inputs, p, name=name + 'conv2d_pad')
