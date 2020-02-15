@@ -209,7 +209,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 
 
                 #get conversion target name ,like pop_piano_test_1
-                target_name = label_enc.inverse_transform([temp_index])[0]
+                target_name = label_enc.inverse_transform([temp_index_t])[0]
 
                 generated_results,origin_midi,generated_cycle = model.test(sample_images, target_test_sample_label, source_test_sample_label)
 

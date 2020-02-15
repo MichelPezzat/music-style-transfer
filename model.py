@@ -32,7 +32,7 @@ class StarGAN(object):
         self.discriminator = discriminator
         self.generator = generator
         self.classifier = classifier
-        self.criterionGAN = mae_criterion
+        self.criterionGAN = sce_criterion
 
         self.build_model()
 
