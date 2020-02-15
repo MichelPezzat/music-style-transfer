@@ -14,7 +14,7 @@ class StarGAN(object):
                  pitch_range,
                  styles_num,
                  batchsize,
-                 discriminator=discriminator,
+                 discriminator=discriminator_gatedcnn,
                  generator=generator_gatedcnn,
                  classifier=domain_classifier_b,
                  mode='train',

@@ -532,17 +532,17 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         d3 = downsample2d_block(d2, filters=128, kernel_size=[4, 4], strides=[2, 2], padding=[1, 1], name_prefix='down_3')
         print(f'd3: {d3.shape.as_list()}')
 
-        d4 = downsample2d_block(d3, filters=64, kernel_size=[3, 5], strides=[1, 1], padding=[1, 2], name_prefix='down_4')
-        print(f'd4: {d4.shape.as_list()}')
+        #d4 = downsample2d_block(d3, filters=64, kernel_size=[3, 5], strides=[1, 1], padding=[1, 2], name_prefix='down_4')
+        #print(f'd4: {d4.shape.as_list()}')
         #d5 = downsample2d_block(d4, filters=5, kernel_size=[14, 5], strides=[14, 1], padding=[1, 2], name_prefix='down_5')
         #print(f'd5.shape :{d5.shape.as_list()}')
 
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
         c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape.dims[-1].value]), tf.float32)
-        c = tf.tile(c_cast, [1, d4.shape.dims[1].value, d4.shape.dims[2].value, 1])
+        c = tf.tile(c_cast, [1, d3.shape.dims[1].value, d3.shape.dims[2].value, 1])
         print(c.shape.as_list())
-        concated = tf.concat([d4, c], axis=-1)
+        concated = tf.concat([d3, c], axis=-1)
         # print(concated.shape.as_list())
 
         #u1 = upsample2d_block(concated, 64, kernel_size=[14, 5], strides=[14, 1], name_prefix='gen_up_u1')
@@ -594,26 +594,26 @@ def discriminator_gatedcnn(inputs, speaker_id, reuse=False, name='discriminator'
 
         # Downsample
         d1 = downsample2d_block(
-            inputs=concated, filters=32, kernel_size=[3, 9], strides=[1, 1], padding=[1, 4], name_prefix='downsample2d_dis_block1_')
+            inputs=concated, filters=64, kernel_size=[4, 4], strides=[2, 2], padding=[1, 1], name_prefix='downsample2d_dis_block1_')
         c1 = tf.tile(c_cast, [1, d1.shape[1], d1.shape[2], 1])
         d1_concat = tf.concat([d1, c1], axis=-1)
 
         d2 = downsample2d_block(
-            inputs=d1_concat, filters=32, kernel_size=[3, 8], strides=[1, 2], padding=[1, 3], name_prefix='downsample2d_dis_block2_')
+            inputs=d1_concat, filters=256, kernel_size=[4, 4], strides=[2, 2], padding=[1, 1], name_prefix='downsample2d_dis_block2_')
         c2 = tf.tile(c_cast, [1, d2.shape[1], d2.shape[2], 1])
         d2_concat = tf.concat([d2, c2], axis=-1)
 
-        d3 = downsample2d_block(
-            inputs=d2_concat, filters=32, kernel_size=[3, 8], strides=[1, 2], padding=[1, 3], name_prefix='downsample2d_dis_block3_')
-        c3 = tf.tile(c_cast, [1, d3.shape[1], d3.shape[2], 1])
-        d3_concat = tf.concat([d3, c3], axis=-1)
+        #d3 = downsample2d_block(
+         #   inputs=d2_concat, filters=32, kernel_size=[3, 8], strides=[1, 2], padding=[1, 3], name_prefix='downsample2d_dis_block3_')
+        #c3 = tf.tile(c_cast, [1, d3.shape[1], d3.shape[2], 1])
+        #d3_concat = tf.concat([d3, c3], axis=-1)
 
-        d4 = downsample2d_block(
-            inputs=d3_concat, filters=32, kernel_size=[3, 6], strides=[1, 2], padding=[1, 2], name_prefix='downsample2d_diss_block4_')
-        c4 = tf.tile(c_cast, [1, d4.shape[1], d4.shape[2], 1])
-        d4_concat = tf.concat([d4, c4], axis=-1)
+        #d4 = downsample2d_block(
+         #   inputs=d3_concat, filters=32, kernel_size=[3, 6], strides=[1, 2], padding=[1, 2], name_prefix='downsample2d_diss_block4_')
+        #c4 = tf.tile(c_cast, [1, d4.shape[1], d4.shape[2], 1])
+        #d4_concat = tf.concat([d4, c4], axis=-1)
 
-        c1 = conv2d_layer(d4_concat, filters=1, kernel_size=[36, 5], strides=[36, 1], padding=[0, 1], name='discriminator-last-conv')
+        c1 = conv2d_layer(d2_concat, filters=1, kernel_size=[1, 1], strides=[1, 1], padding=[1, 1], name='discriminator-last-conv')
 
         c1_red = tf.reduce_mean(c1, keepdims=True)
 
