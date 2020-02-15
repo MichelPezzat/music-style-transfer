@@ -14,7 +14,7 @@ class StarGAN(object):
                  pitch_range,
                  styles_num,
                  batchsize,
-                 discriminator=discriminator_gatedcnn,
+                 discriminator=discriminator,
                  generator=generator_gatedcnn,
                  classifier=domain_classifier_b,
                  mode='train',
@@ -32,7 +32,7 @@ class StarGAN(object):
         self.discriminator = discriminator
         self.generator = generator
         self.classifier = classifier
-        self.criterionGAN = mae_criterion
+        self.criterionGAN = sce_criterion
 
         self.build_model()
 
