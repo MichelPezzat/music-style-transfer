@@ -537,6 +537,9 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         #d5 = downsample2d_block(d4, filters=5, kernel_size=[14, 5], strides=[14, 1], padding=[1, 2], name_prefix='down_5')
         #print(f'd5.shape :{d5.shape.as_list()}')
 
+        for i in range(10):
+                d4 = residual1d_block(d4, filters = 64,  name_prefix='resblock_' + str(i))
+
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
         c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape.dims[-1].value]), tf.float32)
@@ -552,6 +555,8 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         #print(f'c1 shape: {c1.shape}')
         #u1_concat = tf.concat([u1, c1], axis=-1)
         #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
+
+
 
         u2 = upsample2d_block(concated, 128, [3, 5], [1, 1], name_prefix='gen_up_u2')
         print(f'u2.shape :{u2.shape.as_list()}')
