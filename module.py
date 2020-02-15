@@ -538,7 +538,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         #print(f'd5.shape :{d5.shape.as_list()}')
 
         for i in range(10):
-                d4 = residual1d_block(d4, filters = 64,  name_prefix='resblock_' + str(i))
+                d4 = residual2d_block(d4, filters = 64,  name_prefix='resblock_' + str(i))
 
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
