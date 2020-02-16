@@ -556,7 +556,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         #u1_concat = tf.concat([u1, c1], axis=-1)
         #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
 
-        print(f'd4: {d4.shape.as_list()}')
+        
 
 
 

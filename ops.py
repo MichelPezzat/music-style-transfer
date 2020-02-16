@@ -299,7 +299,7 @@ def residual2d_block(inputs, filters=1024, kernel_size=3, strides=1, name_prefix
     h1_gates = conv2d_layer(inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides, activation=None, name=name_prefix + 'h1_gates')
     h1_norm_gates = instance_norm_layer(inputs=h1_gates, activation_fn=None, name=name_prefix + 'h1_norm_gates')
     h1_glu = gated_linear_layer(inputs=h1_norm, gates=h1_norm_gates, name=name_prefix + 'h1_glu')
-    h2 = conv2d_layer(inputs=h1_glu, filters=filters // 2, kernel_size=kernel_size, strides=strides, activation=None, name=name_prefix + 'h2_conv')
+    h2 = conv2d_layer(inputs=h1_glu, filters=filters, kernel_size=kernel_size, strides=strides, activation=None, name=name_prefix + 'h2_conv')
     h2_norm = instance_norm_layer(inputs=h2, activation_fn=None, name=name_prefix + 'h2_norm')
 
     h3 = inputs + h2_norm
