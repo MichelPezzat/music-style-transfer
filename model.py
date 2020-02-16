@@ -14,9 +14,9 @@ class StarGAN(object):
                  pitch_range,
                  styles_num,
                  batchsize,
-                 discriminator=discriminator_gatedcnn,
-                 generator=generator_gatedcnn,
-                 classifier=domain_classifier_b,
+                 discriminator=discriminator,
+                 generator=generator_resnet,
+                 classifier=domain_classifier,
                  mode='train',
                  log_dir='./log'):
         self.time_step = time_step
