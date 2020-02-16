@@ -543,7 +543,7 @@ def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gat
         #upsample
         speaker_id = tf.convert_to_tensor(speaker_id, dtype=tf.float32)
         c_cast = tf.cast(tf.reshape(speaker_id, [-1, 1, 1, speaker_id.shape.dims[-1].value]), tf.float32)
-        c = tf.tile(c_cast, [1, d4.shape.dims[1].value, d4.shape.dims[2].value, 1])
+        c = tf.tile(c_cast, [1, d3.shape.dims[1].value, d3.shape.dims[2].value, 1])
         print(c.shape.as_list())
         concated = tf.concat([d3, c], axis=-1)
         # print(concated.shape.as_list())
