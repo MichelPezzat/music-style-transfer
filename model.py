@@ -121,8 +121,8 @@ class StarGAN(object):
         #domain_out_xxx [batchsize, 1,1,4], need to convert label[batchsize, 3] to [batchsize, 1,1,3]
         #target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
 
-        self.domain_fake_loss = softmax_criterion(self.domain_out_fake, target_label)
-        self.domain_real_loss = softmax_criterion(self.domain_out_real, target_label)
+        self.domain_fake_loss = softmax_criterion(self.domain_out_fake, self.target_label)
+        self.domain_real_loss = softmax_criterion(self.domain_out_real, self.target_label)
 
         # self.domain_loss = self.domain_fake_loss + self.domain_real_loss
 
