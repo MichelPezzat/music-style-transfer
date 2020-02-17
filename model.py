@@ -119,10 +119,10 @@ class StarGAN(object):
         self.domain_out_fake = self.classifier(self.generation_norm, reuse=True, name='classifier')
 
         #domain_out_xxx [batchsize, 1,1,4], need to convert label[batchsize, 3] to [batchsize, 1,1,3]
-        target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
+        #target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
 
-        self.domain_fake_loss = softmax_criterion(self.domain_out_fake, target_label_reshape)
-        self.domain_real_loss = softmax_criterion(self.domain_out_real, target_label_reshape)
+        self.domain_fake_loss = softmax_criterion(self.domain_out_fake, target_label)
+        self.domain_real_loss = softmax_criterion(self.domain_out_real, target_label)
 
         # self.domain_loss = self.domain_fake_loss + self.domain_real_loss
 
@@ -178,7 +178,7 @@ class StarGAN(object):
         self.generation_test_binary = to_binary(self.generation_test,0.5)
         self.generation_cycle_binary = to_binary(self.generation_cycle,0.5)
 
-    def train(self, input_source, input_target, source_label, input_norm,target_label, gaussian_noise,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
+    def train(self, input_source, input_target, input_norm, source_label, target_label, gaussian_noise,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
     generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001):
 
         generation_f, _, generator_loss, _, generator_summaries = self.sess.run(
@@ -203,7 +203,7 @@ class StarGAN(object):
         domain_classifier_real_loss, _, domain_classifier_summaries = self.sess.run(\
         [self.domain_real_loss, self.classifier_optimizer, self.domain_classifier_summaries],\
         feed_dict={self.input_real: input_source, self.input_norm:input_norm, self.target_real:input_target, \
-        self.generation_norm:generation_f,self.classifier_learning_rate:classifier_learning_rate}
+        self.generation_norm:generation_f,self.classifier_learning_rate:classifier_learning_rate, self.target_label:target_label}
         )
         self.writer.add_summary(domain_classifier_summaries, self.train_step)
 
