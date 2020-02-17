@@ -116,7 +116,7 @@ class StarGAN(object):
 
         self.domain_out_real = self.classifier(self.input_norm, reuse=False, name='classifier')
 
-        self.domain_out_fake = self.classifier(self.generated_norm, reuse=True, name='classifier')
+        self.domain_out_fake = self.classifier(self.generation_norm, reuse=True, name='classifier')
 
         #domain_out_xxx [batchsize, 1,1,4], need to convert label[batchsize, 3] to [batchsize, 1,1,3]
         target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
