@@ -109,7 +109,7 @@ def train(processed_dir: str, test_wav_dir: str):
             if end > num_samples:
                 end = num_samples
 
-            X, X_t, y, y_t = [], [], [], []
+            X, X_t, X_norm,y, y_t = [], [], [], [], []
 
             #get target file paths
             batchnames = names_shuffled[start:end]
@@ -129,10 +129,9 @@ def train(processed_dir: str, test_wav_dir: str):
                 style_name = one_name.split('_')[0]  #pop
 
                 #shape [1,64,84,1]
-                one_file = np.load(one_filename)
-                
+                one_file = np.load(one_filename)*1.
                 X.append(one_file)
-
+                
                 #source label
                 temp_index = label_enc.transform([style_name])[0]
                 temp_arr_s = np.zeros([
@@ -142,12 +141,17 @@ def train(processed_dir: str, test_wav_dir: str):
                 y.append(temp_arr_s)
 
                 #load target files and labels
-                one_file_t = np.load(one_target)
+                one_file_t = np.load(one_target)*1.
+                one_file_norm = one_file_t*2.-1.
                 
 
                 #[1,84,64,1]
                 
                 X_t.append(one_file_t)
+
+
+                X_norm.append(one_file_norm)
+
 
                 #target label
                 temp_index_t = label_enc.transform([target_style_name])[0]
@@ -162,7 +166,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
             
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
-            input_source=X, input_target=X_t, source_label=y, \
+            input_source=X, input_target=X_t, input_norm =X_norm,source_label=y, \
             target_label=y_t,generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
             classifier_learning_rate=domain_classifier_learning_rate, \

@@ -54,6 +54,8 @@ class StarGAN(object):
         self.input_real = tf.placeholder(tf.float32, self.input_shape, name='input_real')
         self.target_real = tf.placeholder(tf.float32, self.input_shape, name='target_real')
 
+        self.input_norm = tf.placeholder(tf.float32,self.input_shape,name= 'input_norm')
+
         self.source_label = tf.placeholder(tf.float32, self.label_shape, name='source_label')
         self.target_label = tf.placeholder(tf.float32, self.label_shape, name='target_label')
 
@@ -110,9 +112,11 @@ class StarGAN(object):
 
         #domain classify loss
 
-        self.domain_out_real = self.classifier(self.target_real, reuse=False, name='classifier')
+        self.generation_norm = tf.placeholder(tf.float32, self.input_shape, name='generation_norm')
 
-        self.domain_out_fake = self.classifier(self.generated_forward, reuse=True, name='classifier')
+        self.domain_out_real = self.classifier(self.input_norm, reuse=False, name='classifier')
+
+        self.domain_out_fake = self.classifier(self.generated_norm, reuse=True, name='classifier')
 
         #domain_out_xxx [batchsize, 1,1,4], need to convert label[batchsize, 3] to [batchsize, 1,1,3]
         target_label_reshape = tf.reshape(self.target_label, [-1, 1, 1, self.styles_num])
@@ -174,29 +178,32 @@ class StarGAN(object):
         self.generation_test_binary = to_binary(self.generation_test,0.5)
         self.generation_cycle_binary = to_binary(self.generation_cycle,0.5)
 
-    def train(self, input_source, input_target, source_label, target_label, gaussian_noise,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
+    def train(self, input_source, input_target, source_label, input_norm,target_label, gaussian_noise,  lambda_cycle=1.0, lambda_identity=1.0, lambda_classifier=1.0, \
     generator_learning_rate=0.0001, discriminator_learning_rate=0.0001, classifier_learning_rate=0.0001):
 
         generation_f, _, generator_loss, _, generator_summaries = self.sess.run(
             [self.generated_forward, self.generated_back, self.generator_loss, self.generator_optimizer, self.generator_summaries], \
             feed_dict = {self.lambda_cycle: lambda_cycle, self.lambda_identity: lambda_identity, self.lambda_classifier:lambda_classifier ,\
             self.input_real: input_source, self.target_real: input_target,\
-             self.source_label:source_label, self.target_label:target_label, \
+             self.input_norm: input_norm, self.source_label:source_label, self.target_label:target_label, \
              self.generator_learning_rate: generator_learning_rate,self.gaussian_noise: gaussian_noise})
+
+        generation_f = generation_f*2.-1.
 
         self.writer.add_summary(generator_summaries, self.train_step)
 
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
         [self.discrimator_loss, self.discriminator_optimizer, self.discriminator_summaries], \
             feed_dict = {self.input_real: input_source, self.target_real: input_target , self.target_label:target_label,\
-            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise})
+            self.discriminator_learning_rate: discriminator_learning_rate, self. gaussian_noise: gaussian_noise, \
+             self.generation_norm: generation_f})
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
 
         domain_classifier_real_loss, _, domain_classifier_summaries = self.sess.run(\
         [self.domain_real_loss, self.classifier_optimizer, self.domain_classifier_summaries],\
-        feed_dict={self.input_real: input_source, self.target_label:target_label, self.target_real:input_target, \
-        self.classifier_learning_rate:classifier_learning_rate}
+        feed_dict={self.input_real: input_source, self.input_norm:input_norm, self.target_real:input_target, \
+        self.generation_norm:generation_f,self.classifier_learning_rate:classifier_learning_rate}
         )
         self.writer.add_summary(domain_classifier_summaries, self.train_step)
 
