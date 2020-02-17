@@ -170,7 +170,7 @@ def discriminator_idnet(image, style_id, reuse=False, name="discriminator"):
             assert tf.get_variable_scope().reuse is False
 
         c_cast = tf.cast(tf.reshape(style_id, [-1, 1, 1, style_id.shape[-1]]), tf.float32)
-        c = tf.tile(c_cast, [1, inputs.shape[1], inputs.shape[2], 1])
+        c = tf.tile(c_cast, [1, image.shape[1], image.shape[2], 1])
 
         concated = tf.concat([image, c], axis=-1)
 
