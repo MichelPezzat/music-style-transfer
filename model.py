@@ -29,7 +29,7 @@ class StarGAN(object):
         self.mode = mode
         self.log_dir = log_dir
 
-        self.discriminator = discriminator
+        self.discriminator = discriminator_idnet
         self.generator = generator
         self.classifier = classifier
         self.criterionGAN = mae_criterion
