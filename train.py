@@ -40,6 +40,8 @@ def train(processed_dir: str, test_wav_dir: str):
     lambda_identity = 5
     lambda_classifier = 3
 
+    sigma = 0.1
+
     generator_learning_rate = 0.0002
     generator_learning_rate_decay = generator_learning_rate / 20000
     discriminator_learning_rate = 0.0002
@@ -80,7 +82,7 @@ def train(processed_dir: str, test_wav_dir: str):
         for i in range(num_samples // BATCHSIZE):
             num_iterations = num_samples // BATCHSIZE * epoch + i
 
-            gaussian_noise = np.abs(np.random.normal(0, 0, (BATCHSIZE, TIME_STEP,
+            gaussian_noise = np.abs(np.random.normal(0, sigma, (BATCHSIZE, TIME_STEP,
                                                                          PITCH_RANGE, 3)))
 
             if num_iterations > 2500:
@@ -197,7 +199,7 @@ def train(processed_dir: str, test_wav_dir: str):
             for one_style_batch in tempfiles:
                 _, style, name = one_style_batch[0][0].rsplit('/', maxsplit=2)
 
-                sample_images = [np.load(one_style_batch[0])*1 for one_style_batch in one_style_batch]
+                sample_images = [np.load(one_style_batch[0])*1. for one_style_batch in one_style_batch]
                 sample_images = np.array(sample_images).astype(np.float32)
 
                 #target label 1->2, 2->3, 3->0, 0->1
