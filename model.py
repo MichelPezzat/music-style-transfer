@@ -136,7 +136,7 @@ class StarGAN(object):
                                 self.lambda_identity * self.identity_loss +\
                                  self.lambda_classifier * self.domain_real_loss
         self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + \
-                                             + self.domain_fake_loss 
+                                              self.domain_fake_loss 
 
         # Categorize variables because we have to optimize the three sets of the variables separately
         trainable_variables = tf.trainable_variables()
