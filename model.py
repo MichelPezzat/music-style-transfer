@@ -104,7 +104,7 @@ class StarGAN(object):
 
         self.d_real_loss_all = self.criterionGAN(self.discrimination_real_all,tf.ones_like(self.discrimination_real_all))
         self.d_fake_loss_all = self.criterionGAN(self.discrimination_fake_all,tf.zeros_like(self.discrimination_fake_all))
-        self.d_all_loss = (d_real_loss_all + d_fake_loss_all) / 2
+        self.d_all_loss = (self.d_real_loss_all + self.d_fake_loss_all) / 2
 
 
 
