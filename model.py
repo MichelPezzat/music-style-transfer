@@ -192,9 +192,9 @@ class StarGAN(object):
              self.generator_learning_rate: generator_learning_rate,self.gaussian_noise: gaussian_noise})
 
         generation_f_norm = generation_f*2.-1.
-        generation_f = self.pool(generation_f)
+        generation_f = self.pool([generation_f])
 
-        print(generation_f.shape)
+        print(len(generation_f))
 
         self.writer.add_summary(generator_summaries, self.train_step)
 
