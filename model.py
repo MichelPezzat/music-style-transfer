@@ -194,6 +194,8 @@ class StarGAN(object):
         generation_f_norm = generation_f*2.-1.
         generation_f = self.pool(generation_f)
 
+        print(generation_f.shape)
+
         self.writer.add_summary(generator_summaries, self.train_step)
 
         discriminator_loss, _, discriminator_summaries = self.sess.run(\
