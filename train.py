@@ -180,7 +180,7 @@ def train(processed_dir: str, test_wav_dir: str):
 
 
                 
-            
+            print(len(X_m))
 
             
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
