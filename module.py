@@ -527,7 +527,7 @@ def discriminator_c(x_init, reuse=False, scope="discriminator"):
             #c_kernel = int(self.img_size / np.power(2, 6))
 
             logit = conv(x, channels=1, kernel=3, stride=1, pad=1, use_bias=False, scope='D_logit')
-            c = conv(x, channels=4, kernel=2, stride=1, use_bias=False, scope='D_label')
+            c = conv(x, channels=4, kernel=1, stride=1, use_bias=False, scope='D_label')
             c = tf.reshape(c, shape=[-1, 4])
 
             return logit, c

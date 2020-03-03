@@ -221,38 +221,39 @@ def train(processed_dir: str, test_wav_dir: str):
 
             for one_style_batch in tempfiles:
                 _, style, name = one_style_batch[0][0].rsplit('/', maxsplit=2)
-               for target in exclude_dict[style]:
-
-
                 sample_images = [np.load(one_style_batch[0])*1. for one_style_batch in one_style_batch]
                 sample_images = np.array(sample_images).astype(np.float32)
+                for target in exclude_dict[style]:
 
-                #target label 1->2, 2->3, 3->0, 0->1
-                source_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
-                target_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
-                temp_index_s = label_enc.transform([style])[0]
-                temp_index_t = label_enc.transform([target])[0]
+
+                     
+
+                     #target label 1->2, 2->3, 3->0, 0->1
+                     source_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
+                     target_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
+                     temp_index_s = label_enc.transform([style])[0]
+                     temp_index_t = label_enc.transform([target])[0]
 
                 
-                for i in range(len(one_style_batch)):
-                    source_test_sample_label[i][temp_index_s] = 1
-                    target_test_sample_label[i][temp_index_t] = 1
+                     for i in range(len(one_style_batch)):
+                          source_test_sample_label[i][temp_index_s] = 1
+                          target_test_sample_label[i][temp_index_t] = 1
                 
 
-                #get conversion target name ,like pop_piano_test_1
-                target_name = label_enc.inverse_transform([temp_index_t])[0]
+                     #get conversion target name ,like pop_piano_test_1
+                     target_name = label_enc.inverse_transform([temp_index_t])[0]
 
-                generated_results,origin_midi,generated_cycle = model.test(sample_images, target_test_sample_label, source_test_sample_label)
+                     generated_results,origin_midi,generated_cycle = model.test(sample_images, target_test_sample_label, source_test_sample_label)
 
-                #print(generated_results.shape)
+                     #print(generated_results.shape)
 
-                midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
-                midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
-                midi_path_cycle = os.path.join(file_path, '{}_transfer_2_{}_cycle.mid'.format(name,target_name))
+                     midi_path_origin = os.path.join(file_path, '{}_origin.mid'.format(name))
+                     midi_path_transfer = os.path.join(file_path, '{}_transfer_2_{}.mid'.format(name,target_name))
+                     midi_path_cycle = os.path.join(file_path, '{}_transfer_2_{}_cycle.mid'.format(name,target_name))
 
-                save_midis(origin_midi, midi_path_origin)
-                save_midis(generated_results, midi_path_transfer)
-                save_midis(generated_cycle, midi_path_cycle)
+                     save_midis(origin_midi, midi_path_origin)
+                     save_midis(generated_results, midi_path_transfer)
+                     save_midis(generated_cycle, midi_path_cycle)
                 
                 
                 print('============save converted midis============')
