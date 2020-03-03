@@ -194,7 +194,6 @@ def train(processed_dir: str, test_wav_dir: str):
             input_source=X, input_target=X_t, input_mixed = X_m,source_label=y, \
             target_label=y_t, mixed_label = y_m, generator_learning_rate=generator_learning_rate,\
              discriminator_learning_rate=discriminator_learning_rate,\
-            classifier_learning_rate=domain_classifier_learning_rate, \
             lambda_identity=lambda_identity, lambda_cycle=lambda_cycle,\
             lambda_classifier=lambda_classifier, gaussian_noise = gaussian_noise\
             )
