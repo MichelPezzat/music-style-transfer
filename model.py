@@ -166,8 +166,8 @@ class StarGAN(object):
             learning_rate=self.generator_learning_rate, beta1=0.5).minimize(
                 self.generator_loss_all, var_list=self.generator_vars)
 
-        self.classifier_optimizer = tf.train.AdamOptimizer(learning_rate=self.classifier_learning_rate).minimize(
-            self.domain_real_loss, var_list=self.classifier_vars)
+        #self.classifier_optimizer = tf.train.AdamOptimizer(learning_rate=self.classifier_learning_rate).minimize(
+         #   self.domain_real_loss, var_list=self.classifier_vars)
 
         # test
         self.input_test = tf.placeholder(tf.float32, self.input_shape, name='input_test')
