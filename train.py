@@ -128,6 +128,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 t = one_target.rsplit('/', maxsplit=1)[1]  #'./data/jazz_classic_pop/pop_piano_train_688.npy'
                 target_style_name = t.rsplit('.', maxsplit=1)[0].split('_')[0]
 
+
                 #source name
                 style_name = one_name.split('_')[0]  #pop
 
@@ -177,10 +178,16 @@ def train(processed_dir: str, test_wav_dir: str):
                 temp_arr_m[temp_index_m] = 1
                 y_m.append(temp_arr_m)
 
+                print(style_name)
+
+
+
+                print(target_style_name)
+
 
 
                 
-            print(len(X_m))
+            
 
             
             generator_loss, discriminator_loss, domain_classifier_loss = model.train(\
