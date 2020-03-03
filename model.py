@@ -84,7 +84,7 @@ class StarGAN(object):
         self.generator_loss = self.criterionGAN(self.discirmination,tf.ones_like(self.discirmination))
         # Discriminator adversial loss
 
-        self.discirmination_fake, _ = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
+        self.discirmination_fake, _ = self.discriminator(self.generated_forward + self.gaussian_noise, reuse=True, name='discriminator')
 
         self.discrimination_real_loss = self.criterionGAN(self.discrimination_real,tf.ones_like(self.discrimination_real))
         self.discrimination_fake_loss = self.criterionGAN(self.discirmination_fake,tf.zeros_like(self.discirmination_fake))
@@ -94,7 +94,7 @@ class StarGAN(object):
         x_hat = epsilon * self.generated_forward + (1.0 - epsilon) * self.input_real
 
         # gradient penalty
-        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, name='discriminator'), [x_hat])
+        gradients = tf.gradients(self.discriminator(x_hat, self.target_label, reuse=True, name='discriminator')[0], [x_hat])
         _gradient_penalty = 10.0 * tf.square(tf.norm(gradients[0], ord=2) - 1.0)
 
         self.fake_sample = tf.placeholder(tf.float32, self.input_shape, name='fake_sample')
