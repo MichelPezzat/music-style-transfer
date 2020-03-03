@@ -512,6 +512,26 @@ def generator(x_init, c, channel = 64,reuse=False, name="generator"):
 
             return x
 
+def discriminator_c(x_init, reuse=False, scope="discriminator"):
+        with tf.variable_scope(scope, reuse=reuse) :
+            channel = 64
+            x = conv(x_init, channel, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_0')
+            x = lrelu(x, 0.01)
+
+            for i in range(1, 6):
+                x = conv(x, channel * 2, kernel=4, stride=2, pad=1, use_bias=True, scope='conv_' + str(i))
+                x = lrelu(x, 0.01)
+
+                channel = channel * 2
+
+            #c_kernel = int(self.img_size / np.power(2, 6))
+
+            logit = conv(x, channels=1, kernel=3, stride=1, pad=1, use_bias=False, scope='D_logit')
+            c = conv(x, channels=4, kernel=2, stride=1, use_bias=False, scope='D_label')
+            c = tf.reshape(c, shape=[-1, 4])
+
+            return logit, c
+
 def generator_gatedcnn(inputs, speaker_id=None, reuse=False, name='generator_gatedcnn'):
     #input shape [batchsize, h, w, c]
     #speaker_id [batchsize, one_hot_vector]

@@ -76,8 +76,8 @@ def resblock(x_init, channels, use_bias=True, scope='resblock'):
 def tanh(x):
     return tf.tanh(x)
 
-def lrelu(x, leak=0.2, name="lrelu"):
-    return tf.maximum(x, leak*x)
+def lrelu(x, alpha=0.2, name="lrelu"):
+    return tf.nn.leaky_relu(x, alpha)
 
 
 def relu(tensor_in):

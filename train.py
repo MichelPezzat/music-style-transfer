@@ -221,6 +221,8 @@ def train(processed_dir: str, test_wav_dir: str):
 
             for one_style_batch in tempfiles:
                 _, style, name = one_style_batch[0][0].rsplit('/', maxsplit=2)
+               for target in exclude_dict[style]:
+
 
                 sample_images = [np.load(one_style_batch[0])*1. for one_style_batch in one_style_batch]
                 sample_images = np.array(sample_images).astype(np.float32)
@@ -229,7 +231,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 source_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
                 target_test_sample_label = np.zeros([len(one_style_batch),len(all_styles)])
                 temp_index_s = label_enc.transform([style])[0]
-                temp_index_t = (temp_index_s + 2) % len(all_styles)
+                temp_index_t = label_enc.transform([target])[0]
 
                 
                 for i in range(len(one_style_batch)):

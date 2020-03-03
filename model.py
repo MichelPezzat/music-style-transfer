@@ -76,10 +76,10 @@ class StarGAN(object):
         self.identity_map = self.generator(self.input_real, self.source_label, reuse=True, name='generator')
         self.identity_loss = abs_criterion(self.input_real, self.identity_map)
 
-        self.discrimination_real = self.discriminator(self.target_real + self.gaussian_noise, self.target_label, reuse=False, name='discriminator')
+        self.discrimination_real = self.discriminator(self.target_real + self.gaussian_noise, reuse=False, name='discriminator')
 
         #combine discriminator and generator
-        self.discirmination = self.discriminator(self.generated_forward + self.gaussian_noise, self.target_label, reuse=True, name='discriminator')
+        self.discirmination = self.discriminator(self.generated_forward + self.gaussian_noise, reuse=True, name='discriminator')
 
         self.generator_loss = self.criterionGAN(self.discirmination,tf.ones_like(self.discirmination))
         # Discriminator adversial loss
