@@ -206,8 +206,8 @@ class StarGAN(object):
 
         self.writer.add_summary(discriminator_summaries, self.train_step)
 
-        domain_classifier_real_loss, _, domain_classifier_summaries = self.sess.run(\
-        [self.domain_real_loss, self.classifier_optimizer, self.domain_classifier_summaries],\
+        domain_classifier_real_loss, domain_classifier_summaries = self.sess.run(\
+        [self.domain_real_loss, self.domain_classifier_summaries],\
         feed_dict={self.input_real: input_source, self.target_real:input_target, \
         self.classifier_learning_rate:classifier_learning_rate, self.target_label:target_label}
         )
