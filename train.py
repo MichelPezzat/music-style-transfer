@@ -40,7 +40,7 @@ def train(processed_dir: str, test_wav_dir: str):
     lambda_identity = 5
     lambda_classifier = 3
 
-    sigma = 0.1
+    sigma = 0.01
 
     generator_learning_rate = 0.0002
     generator_learning_rate_decay = generator_learning_rate / 20000
@@ -212,13 +212,14 @@ def train(processed_dir: str, test_wav_dir: str):
                 p = os.path.join(test_wav_dir, f'{one_style}/*.npy')
                 npys = glob.glob(p)
                 npys.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[-1]))
-                tempfiles.append(list(zip(npys[:BATCHSIZE])))   #'./data/test/pop/pop_piano_test.npy'
+                tempfiles.append(list(zip(npys[:BATCHSIZE]))) 
+                targets = [fn for fn in all_styles if one_style!=fn] #'./data/test/pop/pop_piano_test.npy'
 
             for one_style_batch in tempfiles:
                 _, style, name = one_style_batch[0][0].rsplit('/', maxsplit=2)
                 sample_images = [np.load(one_style_batch[0])*1. for one_style_batch in one_style_batch]
                 sample_images = np.array(sample_images).astype(np.float32)
-                for target in exclude_dict[style]:
+                for target in targets:
 
 
                      

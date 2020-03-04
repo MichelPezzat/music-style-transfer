@@ -105,7 +105,7 @@ class StarGAN(object):
 
         self.d_real_loss_all = self.criterionGAN(self.discrimination_real_all,tf.ones_like(self.discrimination_real_all))
         self.d_fake_loss_all = self.criterionGAN(self.discrimination_fake_all,tf.zeros_like(self.discrimination_fake_all))
-        self.d_all_loss = (self.d_real_loss_all + self.d_fake_loss_all) / 2
+        self.d_all_loss = (self.d_real_loss_all + self.d_fake_loss_all) / 2 
 
 
 
@@ -139,7 +139,7 @@ class StarGAN(object):
                                 self.lambda_identity * self.identity_loss +\
                                  self.lambda_classifier * self.domain_real_loss
         self.discrimator_loss = self.discrimination_fake_loss + self.discrimination_real_loss + \
-                                              self.domain_fake_loss + self.d_all_loss
+                                              self.domain_fake_loss + _gradient_penalty
 
         # Categorize variables because we have to optimize the three sets of the variables separately
         trainable_variables = tf.trainable_variables()
