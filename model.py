@@ -16,7 +16,7 @@ class StarGAN(object):
                  styles_num,
                  batchsize,
                  discriminator=discriminator,
-                 generator=generator_resnet,
+                 generator=generator_idnet,
                  classifier=domain_classifier,
                  mode='train',
                  log_dir='./log'):
