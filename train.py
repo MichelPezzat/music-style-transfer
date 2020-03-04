@@ -178,11 +178,7 @@ def train(processed_dir: str, test_wav_dir: str):
                 temp_arr_m[temp_index_m] = 1
                 y_m.append(temp_arr_m)
 
-                print(style_name)
-
-
-
-                print(target_style_name)
+               
 
 
 

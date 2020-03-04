@@ -208,7 +208,7 @@ class StarGAN(object):
 
         domain_classifier_real_loss, domain_classifier_summaries = self.sess.run(\
         [self.domain_real_loss, self.domain_classifier_summaries],\
-        feed_dict={self.input_real: input_source, self.target_real:input_target, self.target_label:target_label}
+        feed_dict={self.input_real: input_source, self. gaussian_noise: gaussian_noise,self.target_real:input_target, self.target_label:target_label}
         )
         self.writer.add_summary(domain_classifier_summaries, self.train_step)
 
