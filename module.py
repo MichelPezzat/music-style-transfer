@@ -690,76 +690,170 @@ def domain_classifier_b(inputs, reuse=False, name='classifier'):
 
         return o_r
 
-def generator_idnet(image, style_id, reuse=False, name="generator"):
+def generator_idnet(image, style_id, gf_dim = 64,reuse=False, name="generator"):
 
     with tf.variable_scope(name):
+
         # image is 256 x 256 x input_c_dim
+
         if reuse:
+
             tf.get_variable_scope().reuse_variables()
+
         else:
+
             assert tf.get_variable_scope().reuse is False
 
-        
+
+
+        def residule_block(x, dim, ks=3, s=1, name='res'):
+
+            # e.g, x is (# of images * 128 * 128 * 3)
+
+            p = int((ks - 1) / 2)
+
+            # For ks = 3, p = 1
+
+            y = tf.pad(x, [[0, 0], [p, p], [p, p], [0, 0]], "REFLECT")
+
+            # After first padding, (# of images * 130 * 130 * 3)
+
+            y = instance_norm(conv2d(y, dim, ks, s, padding='VALID', name=name+'_c1'), name+'_bn1')
+
+            # After first conv2d, (# of images * 128 * 128 * 3)
+
+            y = tf.pad(tf.nn.relu(y), [[0, 0], [p, p], [p, p], [0, 0]], "REFLECT")
+
+            # After second padding, (# of images * 130 * 130 * 3)
+
+            y = instance_norm(conv2d(y, dim, ks, s, padding='VALID', name=name+'_c2'), name+'_bn2')
+
+            # After second conv2d, (# of images * 128 * 128 * 3)
+
+            return relu(y + x)
+
+
 
         # Justin Johnson's model from https://github.com/jcjohnson/fast-neural-style/
+
         # The network with 9 blocks consists of: c7s1-32, d64, d128, R128, R128, R128,
+
         # R128, R128, R128, R128, R128, R128, u64, u32, c7s1-3
+        
+
+        
+
+
 
         # Original image is (# of images * 256 * 256 * 3)
-        d0 = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+
+        image = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+
         # c0 is (# of images * 262 * 262 * 3)
-        d1 = relu(instance_norm(conv2d(d0, 32, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
+
+        u1 = relu(instance_norm(conv2d(image, gf_dim, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
+
         # c1 is (# of images * 256 * 256 * 64)
-        d2 = relu(instance_norm(conv2d(d1, 64, 3, 2, name='g_e2_c'), 'g_e2_bn'))
+
+        u2 = relu(instance_norm(conv2d(u1, gf_dim*2, 3, 2, name='g_e2_c'), 'g_e2_bn'))
+
         # c2 is (# of images * 128 * 128 * 128)
-        d3 = relu(instance_norm(conv2d(d2, 128, 3, 2, name='g_e3_c'), 'g_e3_bn'))
+
+        u3 = relu(instance_norm(conv2d(u2, gf_dim*4, 3, 2, name='g_e3_c'), 'g_e3_bn'))
+
         # c3 is (# of images * 64 * 64 * 256)
 
-        d4 = relu(instance_norm(conv2d(d3, 64, 3, 3, name='g_e4_c'), 'g_e4_bn'))
-        d5 = relu(instance_norm(conv2d(d4, 32, 3, [4, 1], name='g_e5_c'), 'g_e5_bn'))
 
-        speaker_id = tf.convert_to_tensor(style_id, dtype=tf.float32)
-        c_cast = tf.cast(tf.reshape(style_id, [-1, 1, 1, style_id.shape.dims[-1].value]), tf.float32)
-        c = tf.tile(c_cast, [1, d5.shape.dims[1].value, d5.shape.dims[2].value, 1])
-        #print(c.shape.as_list())
-        concated = tf.concat([d5, c], axis=-1)
+
+        # c4 = relu(instance_norm(conv2d(c3, options.gf_dim*8, 3, 3, name='g_e4_c'), 'g_e4_bn'))
+
+        # c5 = relu(instance_norm(conv2d(c4, options.gf_dim*16, 3, [4, 1], name='g_e5_c'), 'g_e5_bn'))
+
+
 
         # define G network with 9 resnet blocks
-        
 
-        u4 = relu(instance_norm(deconv2d(concated, 64, 3, [4, 1], name='g_d4_dc'), 'g_d4_bn'))
-        
-        c1 = tf.tile(c_cast, [1, u4.shape.dims[1].value, u4.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u4_concat = tf.concat([u4, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-        
-        u5 = relu(instance_norm(deconv2d(u4_concat, 128, 3, 3, name='g_d5_dc'), 'g_d5_bn'))
+        r1 = residule_block(c3, gf_dim*4, name='g_r1')
 
-        c2 = tf.tile(c_cast, [1, u5.shape.dims[1].value, u5.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u5_concat = tf.concat([u5, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
+        # r1 is (# of images * 64 * 64 * 256)
 
-        u1 = relu(instance_norm(deconv2d(u5_concat, 64, 3, 2, name='g_d1_dc'), 'g_d1_bn'))
+        r2 = residule_block(r1, gf_dim*4, name='g_r2')
 
-        c3 = tf.tile(c_cast, [1, u1.shape.dims[1].value, u1.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u1_concat = tf.concat([u1, c3], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
+        # r2 is (# of images * 64 * 64 * 256)
+
+        r3 = residule_block(r2, gf_dim*4, name='g_r3')
+
+        # r3 is (# of images * 64 * 64 * 256)
+
+        r4 = residule_block(r3, gf_dim*4, name='g_r4')
+
+        # r4 is (# of images * 64 * 64 * 256)
+
+        r5 = residule_block(r4, gf_dim*4, name='g_r5')
+
+        # r5 is (# of images * 64 * 64 * 256)
+
+        r6 = residule_block(r5, gf_dim*4, name='g_r6')
+
+        # r6 is (# of images * 64 * 64 * 256)
+
+        r7 = residule_block(r6, gf_dim*4, name='g_r7')
+
+        # r7 is (# of images * 64 * 64 * 256)
+
+        r8 = residule_block(r7, gf_dim*4, name='g_r8')
+
+        # r8 is (# of images * 64 * 64 * 256)
+
+        r9 = residule_block(r8, gf_dim*4, name='g_r9')
+
+        # r9 is (# of images * 64 * 64 * 256)
+
+        r10 = residule_block(r9, gf_dim*4, name='g_r10')
+
+        c1 = tf.cast(tf.reshape(c, shape=[-1, 1, 1, c.shape[-1]]), tf.float32)
+
+        c1 = tf.tile(c1, [1, r10.shape[1], r10.shape[2], 1])
+
+        r10_concat = tf.concat([r10, c1], axis=-1)
+
+
+
+        # d4 = relu(instance_norm(deconv2d(r9, options.gf_dim*8, 3, [4, 1], name='g_d4_dc'), 'g_d4_bn'))
+
+        # d5 = relu(instance_norm(deconv2d(d4, options.gf_dim*4, 3, 3, name='g_d5_dc'), 'g_d5_bn'))
+
+
+
+        d1 = relu(instance_norm(deconv2d(r10_concat, gf_dim*2, 3, 2, name='g_d1_dc'), 'g_d1_bn'))
+
+
+
+        c2 = tf.tile(c1, [1, d1.shape[1], d1.shape[2], 1])
+
+        d1_concat = tf.concat([d1, c2], axis=-1)
+
 
         # d1 is (# of images * 128 * 128 * 128)
-        u2 = relu(instance_norm(deconv2d(u1_concat, 32, 3, 2, name='g_d2_dc'), 'g_d2_bn'))
 
-        c4 = tf.tile(c_cast, [1, u2.shape.dims[1].value, u2.shape.dims[2].value, 1])
-        #print(f'c1 shape: {c1.shape}')
-        u2_concat = tf.concat([u2, c1], axis=-1)
-        #print(f'u1_concat.shape :{u1_concat.shape.as_list()}')
-        
+        d2 = relu(instance_norm(deconv2d(d1_concat, gf_dim, 3, 2, name='g_d2_dc'), 'g_d2_bn'))
+
+
+
+        c3 = tf.tile(c1, [1, d2.shape[1], d2.shape[2], 1])
+
+        d2_concat = tf.concat([d2, c3], axis=-1)
+
         # d2 is (# of images * 256 * 256 * 64)
-        u3 = tf.pad(u2_concat, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+
+        d3 = tf.pad(d2_concat, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+
         # After padding, (# of images * 262 * 262 * 64)
-        pred = tf.nn.sigmoid(deconv2d(u3, 1, 7, 1, padding='VALID', name='g_pred_c'))
+
+        pred = tf.nn.sigmoid(conv2d(d3, 3, 7, 1, padding='VALID', name='g_pred_c'))
+
         # Output image is (# of images * 256 * 256 * 3)
+
+    
 
         return pred
