@@ -6,7 +6,7 @@ import time
 import librosa
 import glob
 #from preprocess import *
-#from model import *
+from model import *
 from sklearn.utils import shuffle
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from utility import *
@@ -40,7 +40,7 @@ def train(processed_dir: str, test_wav_dir: str):
     lambda_identity = 5
     lambda_classifier = 3
 
-    sigma = 0.01
+    sigma = 0.1
 
     generator_learning_rate = 0.0002
     generator_learning_rate_decay = generator_learning_rate / 20000
