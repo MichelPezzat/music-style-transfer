@@ -33,7 +33,7 @@ class StarGAN(object):
         self.discriminator = discriminator
         self.generator = generator
         self.classifier = classifier
-        self.criterionGAN = mae_criterion
+        self.criterionGAN = sce_criterion
 
         self.build_model()
 
@@ -254,5 +254,3 @@ class StarGAN(object):
         self.saver.restore(self.sess, tf.train.latest_checkpoint(filepath))
 
 
-if __name__ == '__main__':
-    starganvc = StarGAN(36)

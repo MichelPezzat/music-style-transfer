@@ -6,7 +6,7 @@ import time
 import librosa
 import glob
 #from preprocess import *
-from model import *
+#from model import *
 from sklearn.utils import shuffle
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from utility import *
@@ -111,7 +111,7 @@ def train(processed_dir: str, test_wav_dir: str):
             if end > num_samples:
                 end = num_samples
 
-            X, X_t, X_m,y, y_t, y_m = [], [], [], [], [], []
+            X, X_t, X_norm, X_m,y, y_t, y_m = [], [], [], [], [], [], []
 
             #get target file paths
             batchnames = names_shuffled[start:end]
@@ -145,13 +145,18 @@ def train(processed_dir: str, test_wav_dir: str):
                 y.append(temp_arr_s)
 
                 #load target files and labels
-                one_file_t = np.load(one_target)*1.
                 
+
+                one_file_t = np.load(one_target)*1.
+                one_file_norm = one_file_t*2.-1.
                 
 
                 #[1,84,64,1]
                 
                 X_t.append(one_file_t)
+
+
+                X_norm.append(one_file_norm)
 
 
                 
