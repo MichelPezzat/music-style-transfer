@@ -747,21 +747,24 @@ def generator_idnet(image, c, gf_dim = 64,reuse=False, name="generator"):
 
         # Original image is (# of images * 256 * 256 * 3)
 
-        image = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+        u0 = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
 
-        
+        print(f'input: {image.shape.as_list()}')
 
         # c0 is (# of images * 262 * 262 * 3)
 
-        u1 = relu(instance_norm(conv2d(image, gf_dim, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
+        u1 = relu(instance_norm(conv2d(u0, gf_dim, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
+        print(f'u1: {u1.shape.as_list()}')
 
         # c1 is (# of images * 256 * 256 * 64)
 
         u2 = relu(instance_norm(conv2d(u1, gf_dim*2, 3, 2, name='g_e2_c'), 'g_e2_bn'))
+        print(f'u2: {u2.shape.as_list()}')
 
         # c2 is (# of images * 128 * 128 * 128)
 
         u3 = relu(instance_norm(conv2d(u2, gf_dim*4, 3, 2, name='g_e3_c'), 'g_e3_bn'))
+        print(f'u3: {u3.shape.as_list()}')
 
         # c3 is (# of images * 64 * 64 * 256)
 
@@ -813,9 +816,11 @@ def generator_idnet(image, c, gf_dim = 64,reuse=False, name="generator"):
 
         r10 = residule_block(r9, gf_dim*4, name='g_r10')
 
-        c1 = tf.cast(tf.reshape(c, shape=[-1, 1, 1, c.shape[-1]]), tf.float32)
+        print(f'r10: {r10.shape.as_list()}')
 
-        c1 = tf.tile(c1, [1, r10.shape[1], r10.shape[2], 1])
+        c_cast = tf.cast(tf.reshape(c, shape=[-1, 1, 1, c.shape[-1]]), tf.float32)
+
+        c1 = tf.tile(c_cast, [1, r10.shape[1], r10.shape[2], 1])
 
         r10_concat = tf.concat([r10, c1], axis=-1)
 
@@ -828,21 +833,25 @@ def generator_idnet(image, c, gf_dim = 64,reuse=False, name="generator"):
 
 
         d1 = relu(instance_norm(deconv2d(r10_concat, gf_dim*2, 3, 2, name='g_d1_dc'), 'g_d1_bn'))
+        
 
 
 
-        c2 = tf.tile(c1, [1, d1.shape[1], d1.shape[2], 1])
+        c2 = tf.tile(c_cast, [1, d1.shape[1], d1.shape[2], 1])
 
         d1_concat = tf.concat([d1, c2], axis=-1)
+
+        print(f'd1_concat: {d1_concat.shape.as_list()}')
 
 
         # d1 is (# of images * 128 * 128 * 128)
 
         d2 = relu(instance_norm(deconv2d(d1_concat, gf_dim, 3, 2, name='g_d2_dc'), 'g_d2_bn'))
+        print(f'd2: {d2.shape.as_list()}')
 
 
 
-        c3 = tf.tile(c1, [1, d2.shape[1], d2.shape[2], 1])
+        c3 = tf.tile(c_cast, [1, d2.shape[1], d2.shape[2], 1])
 
         d2_concat = tf.concat([d2, c3], axis=-1)
 
@@ -855,6 +864,7 @@ def generator_idnet(image, c, gf_dim = 64,reuse=False, name="generator"):
         pred = tf.nn.sigmoid(conv2d(d3, 3, 7, 1, padding='VALID', name='g_pred_c'))
 
         # Output image is (# of images * 256 * 256 * 3)
+        print(f'pred.shape :{pred.shape.as_list()}')
 
     
 
