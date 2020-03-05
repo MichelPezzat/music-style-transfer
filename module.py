@@ -19,6 +19,10 @@ def sce_criterion(logits, labels):
 def softmax_criterion(logits, labels):
     return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels))
 
+def wass_criterion(logits):
+    return tf.reduce_mean(logits)
+
+
 
 def discriminator_midinet(image, options, reuse=False, name="discriminator"):
     with tf.variable_scope(name):
