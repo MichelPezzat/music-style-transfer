@@ -690,7 +690,7 @@ def domain_classifier_b(inputs, reuse=False, name='classifier'):
 
         return o_r
 
-def generator_idnet(image, style_id, gf_dim = 64,reuse=False, name="generator"):
+def generator_idnet(image, c, gf_dim = 64,reuse=False, name="generator"):
 
     with tf.variable_scope(name):
 
@@ -749,6 +749,8 @@ def generator_idnet(image, style_id, gf_dim = 64,reuse=False, name="generator"):
 
         image = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
 
+        
+
         # c0 is (# of images * 262 * 262 * 3)
 
         u1 = relu(instance_norm(conv2d(image, gf_dim, 7, 1, padding='VALID', name='g_e1_c'), 'g_e1_bn'))
@@ -773,7 +775,7 @@ def generator_idnet(image, style_id, gf_dim = 64,reuse=False, name="generator"):
 
         # define G network with 9 resnet blocks
 
-        r1 = residule_block(c3, gf_dim*4, name='g_r1')
+        r1 = residule_block(u3, gf_dim*4, name='g_r1')
 
         # r1 is (# of images * 64 * 64 * 256)
 
