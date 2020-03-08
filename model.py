@@ -38,7 +38,9 @@ class StarGAN(object):
         self.build_model()
 
         self.saver = tf.train.Saver()
-        self.sess = tf.Session()
+        tfconfig = tf.ConfigProto(allow_soft_placement=True)
+        tfconfig.gpu_options.allow_growth = True
+        self.sess = tf.Session(config=tfconfig)
         self.sess.run(tf.global_variables_initializer())
 
         if self.mode == 'train':
